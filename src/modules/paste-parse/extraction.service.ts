@@ -1,14 +1,23 @@
 import { Injectable, HttpException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+/** Structured order data extracted from raw text via LLM */
 export interface ExtractedOrderData {
+  /** Customer's full name */
   customerName: string;
+  /** Customer's phone number */
   phone: string;
+  /** Shipping governorate */
   governorate: string;
+  /** Shipping district */
   district: string;
+  /** Shipping street address */
   street: string;
+  /** Extracted line items */
   items: Array<{ name: string; qty: number; price: string }>;
+  /** Shipping fee amount */
   shippingFee: string;
+  /** Order total amount */
   total: string;
 }
 
@@ -24,6 +33,12 @@ export class ExtractionService {
       'meta-llama/llama-3.1-70b-instruct';
   }
 
+  /**
+   * Extract structured order data from raw text using LLM.
+   * Calls OpenRouter with a retry mechanism if initial parse fails.
+   * @param text - Raw message text from customer
+   * @returns Extracted customer info + items + totals
+   */
   async extractFromText(text: string): Promise<ExtractedOrderData> {
     const url = 'https://openrouter.ai/api/v1/chat/completions';
     const headers = {

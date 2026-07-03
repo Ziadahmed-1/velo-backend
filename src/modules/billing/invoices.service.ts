@@ -6,6 +6,9 @@ import { Subscription } from './entities/subscription.entity';
 import { OverageService } from './overage.service';
 import { SubscriptionInvoiceStatus } from '../../common/enums';
 
+/**
+ * Generate and manage subscription invoices.
+ */
 @Injectable()
 export class InvoicesService {
   constructor(
@@ -15,6 +18,12 @@ export class InvoicesService {
     private overageService: OverageService,
   ) {}
 
+  /**
+   * Create a new invoice for a subscription.
+   * Calculates base + overage amount to determine total.
+   * @param subscriptionId - Subscription ID
+   * @returns The created SubscriptionInvoice in DRAFT status
+   */
   async createInvoice(subscriptionId: string) {
     const subscription = await this.subRepo.findOne({
       where: { id: subscriptionId },
@@ -40,6 +49,11 @@ export class InvoicesService {
     );
   }
 
+  /**
+   * Find all invoices for a subscription ordered by issued date descending.
+   * @param subscriptionId - Subscription ID
+   * @returns List of invoices
+   */
   async findBySubscription(subscriptionId: string) {
     return this.invoiceRepo.find({
       where: { subscriptionId },
@@ -47,6 +61,11 @@ export class InvoicesService {
     });
   }
 
+  /**
+   * Find a single invoice by its ID.
+   * @param id - Invoice ID
+   * @returns The SubscriptionInvoice entity
+   */
   async findOne(id: string) {
     const invoice = await this.invoiceRepo.findOne({ where: { id } });
     if (!invoice) throw new NotFoundException('Invoice not found');

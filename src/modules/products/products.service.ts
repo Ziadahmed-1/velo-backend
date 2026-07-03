@@ -22,12 +22,23 @@ export class ProductsService {
     private suggestionRepo: Repository<SuggestedItem>,
   ) {}
 
+  /**
+   * Create a new product.
+   * @param accountId - Tenant account ID
+   * @param dto - Product creation payload
+   * @returns The created Product entity
+   */
   async create(accountId: string, dto: CreateProductDto) {
     return this.productRepo.save(
       this.productRepo.create({ ...dto, accountId }),
     );
   }
 
+  /**
+   * List all products for the given account.
+   * @param accountId - Tenant account ID
+   * @returns Array of Product entities with variants and attributes
+   */
   async findAll(accountId: string) {
     return this.productRepo.find({
       where: { accountId },
@@ -35,6 +46,13 @@ export class ProductsService {
     });
   }
 
+  /**
+   * Get a single product by ID.
+   * @param accountId - Tenant account ID
+   * @param id - Product ID
+   * @returns The Product entity with variants and attributes
+   * @throws NotFoundException if not found
+   */
   async findOne(accountId: string, id: string) {
     const product = await this.productRepo.findOne({
       where: { id, accountId },
@@ -44,6 +62,14 @@ export class ProductsService {
     return product;
   }
 
+  /**
+   * Create a variant under an existing product.
+   * @param accountId - Tenant account ID
+   * @param productId - Parent product ID
+   * @param dto - Variant creation payload
+   * @returns The created ProductVariant entity
+   * @throws NotFoundException if parent product not found
+   */
   async createVariant(
     accountId: string,
     productId: string,
@@ -55,6 +81,11 @@ export class ProductsService {
     );
   }
 
+  /**
+   * List undismissed item suggestions (no-match items from LLM).
+   * @param accountId - Tenant account ID
+   * @returns Array of undismissed SuggestedItem entities
+   */
   async getSuggestions(accountId: string) {
     return this.suggestionRepo.find({
       where: { accountId, isDismissed: false },
@@ -62,6 +93,13 @@ export class ProductsService {
     });
   }
 
+  /**
+   * Dismiss a suggestion so it no longer appears in the list.
+   * @param accountId - Tenant account ID
+   * @param id - Suggestion ID
+   * @returns The updated SuggestedItem entity
+   * @throws NotFoundException if suggestion not found
+   */
   async dismissSuggestion(accountId: string, id: string) {
     const suggestion = await this.suggestionRepo.findOne({
       where: { id, accountId },
@@ -71,6 +109,16 @@ export class ProductsService {
     return this.suggestionRepo.save(suggestion);
   }
 
+  /**
+   * Create a product variant from an LLM-generated suggestion.
+   * Marks the suggestion as dismissed and linked to the new variant.
+   * @param accountId - Tenant account ID
+   * @param id - Suggestion ID
+   * @param dto - Variant creation payload
+   * @returns The created ProductVariant entity
+   * @throws NotFoundException if suggestion not found
+   * @throws BadRequestException if suggestion already has a linked variant
+   */
   async createVariantFromSuggestion(
     accountId: string,
     id: string,

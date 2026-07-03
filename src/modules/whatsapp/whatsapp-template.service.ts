@@ -15,6 +15,9 @@ interface TemplateApiResponse {
   waba_templates?: TemplateApiItem[];
 }
 
+/**
+ * Manage WhatsApp message templates, sync from 360dialog.
+ */
 @Injectable()
 export class WhatsAppTemplateService {
   constructor(
@@ -24,12 +27,23 @@ export class WhatsAppTemplateService {
     private accountRepo: Repository<WhatsAppAccount>,
   ) {}
 
+  /**
+   * Get all templates for a tenant account.
+   * @param accountId - Tenant account ID
+   * @returns List of WhatsApp templates
+   */
   async findAll(accountId: string): Promise<WhatsAppTemplate[]> {
     const account = await this.accountRepo.findOne({ where: { accountId } });
     if (!account) throw new NotFoundException('WhatsApp account not found');
     return this.templateRepo.find({ where: { whatsAppAccountId: account.id } });
   }
 
+  /**
+   * Sync WhatsApp templates from 360dialog API.
+   * Creates new templates and updates existing ones based on name.
+   * @param accountId - Tenant account ID
+   * @returns Updated list of templates
+   */
   async syncFromBsp(accountId: string): Promise<WhatsAppTemplate[]> {
     const account = await this.accountRepo.findOne({ where: { accountId } });
     if (!account) throw new NotFoundException('WhatsApp account not found');

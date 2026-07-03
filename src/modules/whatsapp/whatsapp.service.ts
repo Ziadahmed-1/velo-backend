@@ -11,6 +11,9 @@ import {
 import { MessageToOrderService } from './message-to-order.service';
 import { Order } from '../orders/entities/order.entity';
 
+/**
+ * Core WhatsApp operations: 360dialog integration, conversation management, message sending.
+ */
 @Injectable()
 export class WhatsAppService {
   private readonly logger = new Logger(WhatsAppService.name);
@@ -25,12 +28,24 @@ export class WhatsAppService {
     private messageToOrderService: MessageToOrderService,
   ) {}
 
+  /**
+   * Find a WhatsApp account by its 360dialog BSP channel ID.
+   * @param bspChannelId - The phone number ID from 360dialog
+   * @returns The WhatsAppAccount or null if not found
+   */
   async findAccountByBspChannel(
     bspChannelId: string,
   ): Promise<WhatsAppAccount | null> {
     return this.accountRepo.findOne({ where: { bspChannelId } });
   }
 
+  /**
+   * Handle incoming WhatsApp message from 360dialog webhook.
+   * Finds or creates conversation, saves message, calls MessageToOrderService.
+   * @param accountId - Tenant account ID
+   * @param payload - Incoming message data (from, text, bspMessageId)
+   * @returns Success confirmation
+   */
   async handleIncoming(
     accountId: string,
     payload: { from: string; text: string; bspMessageId: string },
@@ -90,6 +105,14 @@ export class WhatsAppService {
     return { success: true };
   }
 
+  /**
+   * Send a text message via 360dialog WhatsApp API.
+   * Saves the outbound message to the most recent conversation with the recipient.
+   * @param accountId - Tenant account ID
+   * @param to - Recipient phone number (international format, no +)
+   * @param text - Message text content
+   * @returns 360dialog API response with message IDs
+   */
   async sendText(
     accountId: string,
     to: string,
@@ -140,6 +163,11 @@ export class WhatsAppService {
     return result;
   }
 
+  /**
+   * Get all conversations for a tenant account.
+   * @param accountId - Tenant account ID
+   * @returns List of conversations with their messages
+   */
   async getConversations(accountId: string) {
     const account = await this.accountRepo.findOne({ where: { accountId } });
     if (!account) throw new NotFoundException('WhatsApp account not found');
@@ -150,6 +178,12 @@ export class WhatsAppService {
     });
   }
 
+  /**
+   * Get all messages for a specific conversation.
+   * @param accountId - Tenant account ID
+   * @param conversationId - Conversation ID
+   * @returns Messages ordered by creation time ascending
+   */
   async getMessages(accountId: string, conversationId: string) {
     const account = await this.accountRepo.findOne({ where: { accountId } });
     if (!account) throw new NotFoundException('WhatsApp account not found');

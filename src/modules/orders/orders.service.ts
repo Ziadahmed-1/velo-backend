@@ -24,6 +24,13 @@ export class OrdersService {
     @InjectQueue(RFM_QUEUE) private rfmQueue: Queue,
   ) {}
 
+  /**
+   * Create an order atomically with items and stock reservation.
+   * Uses a database transaction to ensure consistency.
+   * @param accountId - Tenant account ID
+   * @param dto - Order creation payload
+   * @returns The created Order entity with items, customer, and invoice
+   */
   async create(accountId: string, dto: CreateOrderDto) {
     const qr = this.dataSource.createQueryRunner();
     await qr.connect();
@@ -80,6 +87,11 @@ export class OrdersService {
     }
   }
 
+  /**
+   * List all orders with items, customer, and invoice.
+   * @param accountId - Tenant account ID
+   * @returns Array of Order entities
+   */
   async findAll(accountId: string) {
     return this.orderRepo.find({
       where: { accountId },
@@ -88,6 +100,13 @@ export class OrdersService {
     });
   }
 
+  /**
+   * Get a single order by ID.
+   * @param accountId - Tenant account ID
+   * @param id - Order ID
+   * @returns The Order entity with items, customer, and invoice
+   * @throws NotFoundException if not found
+   */
   async findOne(accountId: string, id: string) {
     const o = await this.orderRepo.findOne({
       where: { id, accountId },
@@ -97,6 +116,15 @@ export class OrdersService {
     return o;
   }
 
+  /**
+   * Confirm a draft order, marking it as non-draft and enqueuing an RFM job.
+   * @param accountId - Tenant account ID
+   * @param id - Order ID
+   * @param dto - Optional confirmation payload (e.g. courier override)
+   * @returns The updated Order entity
+   * @throws NotFoundException if order not found
+   * @throws BadRequestException if order is already confirmed
+   */
   async confirmOrder(accountId: string, id: string, dto?: ConfirmOrderDto) {
     const order = await this.findOne(accountId, id);
     if (!order.isDraft)

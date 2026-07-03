@@ -1,41 +1,47 @@
-# Task 2 Report — Common Layer
+# Task 2 Report
 
-## What was implemented
+## Status: DONE
 
-- **`src/common/enums.ts`** — All shared enums copied verbatim from reference: AccountStatus, UserRole, LedgerReason, OrderStatus, CodStatus, OrderSourceChannel, RemittanceStatus, BillingInterval, SubscriptionStatus, SubscriptionInvoiceStatus, WhatsAppConversationStatus, WhatsAppMessageDirection
-- **`src/common/guards/auth.guard.ts`** — JWT auth guard extending `@nestjs/passport` AuthGuard('jwt')
-- **`src/common/guards/roles.guard.ts`** — Role-based access guard using Reflector metadata
-- **`src/common/guards/subscription.guard.ts`** — Subscription status guard blocking mutating requests for suspended accounts
-- **`src/common/decorators/current-account.decorator.ts`** — Param decorator to extract `request.user`
-- **`src/common/decorators/roles.decorator.ts`** — Method decorator to set required roles metadata
-- **`src/common/common.module.ts`** — Global module registering all guards as APP_GUARD providers
+## Commits
+- `1205706` feat: add paste-parse module with LLM extraction and catalog matching
 
-## Build results
+## Files created
+- `src/modules/paste-parse/paste-parse.module.ts`
+- `src/modules/paste-parse/paste-parse.controller.ts`
+- `src/modules/paste-parse/paste-parse.service.ts`
+- `src/modules/paste-parse/extraction.service.ts`
+- `src/modules/paste-parse/catalog-matcher.service.ts`
+- `src/modules/paste-parse/dto/paste-parse.dto.ts`
+- `tests/unit/paste-parse/extraction.service.spec.ts`
+- `tests/unit/paste-parse/catalog-matcher.service.spec.ts`
+- `tests/unit/paste-parse/paste-parse.service.spec.ts`
 
-`npx nest build` — **succeeded** (no output, zero errors)
+## Files modified
+- `src/app.module.ts` — added PasteParseModule import
+- `.env.example` — added OPENROUTER_API_KEY and OPENROUTER_MODEL
 
-## Files changed
+## Tests
+- 4 tests across 3 suites: all passed
+- 11 total unit tests pass (7 existing + 4 new)
 
-| File                                                 | Action                               |
-| ---------------------------------------------------- | ------------------------------------ |
-| `src/app.module.ts`                                  | modified — added CommonModule import |
-| `src/common/enums.ts`                                | created                              |
-| `src/common/guards/auth.guard.ts`                    | created                              |
-| `src/common/guards/roles.guard.ts`                   | created                              |
-| `src/common/guards/subscription.guard.ts`            | created                              |
-| `src/common/decorators/current-account.decorator.ts` | created                              |
-| `src/common/decorators/roles.decorator.ts`           | created                              |
-| `src/common/common.module.ts`                        | created                              |
+## Lint
+- 0 ESLint errors on `src/` and `tests/`
 
-## Self-review findings
+## Review Fixes (Jul 3, 2026)
 
-- All enums match reference file exactly
-- Guards follow NestJS best practices (CanActivate interface, Reflector pattern)
-- `ROLES_KEY` constant is exported from both `roles.guard.ts` and `roles.decorator.ts` — this is intentional as decorator and guard reference the same key
-- CommonModule is `@Global()` so all modules can use guards/decorators without importing
-- Guards are registered as `APP_GUARD` so they apply globally
-- No test coverage yet (follows task 2 scope)
+### Changes
+1. **Removed unused `Repository<Order>` injection** from `PasteParseService` — removed `@InjectRepository(Order) private orderRepo` (dead code; all persistence uses `qr.manager`)
+2. **`extractedData` param** — confirmed intentional, no change needed
+3. **Strengthened extraction retry test** — `.rejects.toThrow()` → `.rejects.toThrow('Extraction service unavailable')` in `extraction.service.spec.ts:51`
+4. **Added AMBIGUOUS test** — `catalog-matcher.service.spec.ts:63` tests `matchItems` returns `suggestedAlternatives` when LLM responds with `matchStatus: 'AMBIGUOUS'`
 
-## Concerns
+### Tests
+- 5 tests across 3 suites: all passed (3 existing + 2 new)
+- 12 total unit tests pass
 
-- None
+### Lint
+- 0 ESLint errors on `src/` and `tests/`
+
+### Commits
+- `1205706` feat: add paste-parse module with LLM extraction and catalog matching
+- `970d701` fix: address Task 2 review findings — remove dead code, strengthen tests

@@ -5,18 +5,26 @@ import { Repository } from 'typeorm';
 import { ProductVariant } from '../products/entities/product-variant.entity';
 import { MatchStatus } from '../../common/enums';
 
+/** Result of matching an extracted item against the merchant catalog */
 export interface MatchResult {
+  /** Original item name from extraction */
   extractedName: string;
+  /** Match confidence level */
   matchStatus: MatchStatus;
+  /** ID of the matched variant, if any */
   matchedVariantId: string | null;
+  /** Confidence score 0-100 */
   matchConfidence: number | null;
+  /** Alternative suggestions if no exact match */
   suggestedAlternatives: Array<{
     variantId: string;
     name: string;
     price: string;
     reason: string;
   }> | null;
+  /** Ordered quantity */
   quantity: number;
+  /** Unit price */
   price: string;
 }
 
@@ -36,6 +44,13 @@ export class CatalogMatcherService {
       'meta-llama/llama-3.1-70b-instruct';
   }
 
+  /**
+   * Match extracted items against the merchant's product catalog.
+   * Uses LLM to find exact matches or suggest alternatives.
+   * @param accountId - Merchant account ID
+   * @param items - Extracted items to match
+   * @returns Array of match results
+   */
   async matchItems(
     accountId: string,
     items: Array<{ name: string; qty: number; price: string }>,

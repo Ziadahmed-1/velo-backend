@@ -13,6 +13,9 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UserRole } from '../../common/enums';
 
+/**
+ * Authentication: account registration and email/password login with JWT token issuance.
+ */
 @Injectable()
 export class AuthService {
   constructor(
@@ -21,6 +24,13 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
+  /**
+   * Register a new account with an owner user.
+   * Creates both an Account and a User record, hashes the password, and returns a JWT.
+   * @param dto - Registration credentials (businessName, email, password)
+   * @returns An object containing the access token, account ID, and account status
+   * @throws ConflictException if the email is already registered
+   */
   async register(dto: RegisterDto) {
     const existing = await this.userRepo.findOne({
       where: { email: dto.email },
@@ -39,6 +49,13 @@ export class AuthService {
     return this.generateToken(user, account);
   }
 
+  /**
+   * Authenticate a user with email and password.
+   * Validates credentials, fetches the associated account, and returns a JWT.
+   * @param dto - Login credentials (email, password)
+   * @returns An object containing the access token, account ID, and account status
+   * @throws UnauthorizedException if credentials are invalid or account is not found
+   */
   async login(dto: LoginDto) {
     const user = await this.userRepo.findOne({ where: { email: dto.email } });
     if (!user) throw new UnauthorizedException('Invalid credentials');
@@ -51,6 +68,12 @@ export class AuthService {
     return this.generateToken(user, account);
   }
 
+  /**
+   * Generate a JWT access token for the authenticated user.
+   * @param user - The authenticated user entity
+   * @param account - The user's associated account
+   * @returns An object with the access token, account ID, and account status
+   */
   private generateToken(user: User, account: Account) {
     return {
       accessToken: this.jwtService.sign({

@@ -1,381 +1,269 @@
-﻿### Task 3: Accounts Module — Entities + Auth
+﻿# Task 3: Courier Module — Bosta/Mylerz Providers, Webhooks, Remittance
 
-**Files:**
+## Files
+- Create: `src/modules/courier/interfaces/courier-provider.interface.ts`
+- Create: `src/modules/courier/providers/bosta.provider.ts`
+- Create: `src/modules/courier/providers/mylerz.provider.ts`
+- Create: `src/modules/courier/courier.service.ts`
+- Create: `src/modules/courier/remittance.service.ts`
+- Create: `src/modules/courier/courier.controller.ts`
+- Create: `src/modules/courier/dto/create-shipment.dto.ts`
+- Create: `src/modules/courier/dto/courier-webhook.dto.ts`
+- Modify: `src/modules/courier/courier.module.ts`
 
-- Create: `src/modules/accounts/entities/account.entity.ts`
-- Create: `src/modules/accounts/entities/user.entity.ts`
-- Create: `src/modules/accounts/dto/register.dto.ts`
-- Create: `src/modules/accounts/dto/login.dto.ts`
-- Create: `src/modules/accounts/dto/invite-user.dto.ts`
-- Create: `src/modules/accounts/auth.service.ts`
-- Create: `src/modules/accounts/auth.controller.ts`
-- Create: `src/modules/accounts/accounts.service.ts`
-- Create: `src/modules/accounts/accounts.controller.ts`
-- Create: `src/modules/accounts/accounts.module.ts`
-- Create: `src/modules/accounts/jwt.strategy.ts`
-- Create: `tests/unit/auth.service.spec.ts`
+## CourierProvider interface
 
-- [ ] **Step 1-2: Copy Account + User entities from reference**
-
-- [ ] **Step 3: Create DTOs**
-
-`src/modules/accounts/dto/register.dto.ts`:
-
+**src/modules/courier/interfaces/courier-provider.interface.ts:**
 ```typescript
-import { IsEmail, IsString, MinLength } from 'class-validator';
-export class RegisterDto {
-  @IsString() businessName: string;
-  @IsEmail() email: string;
-  @IsString() @MinLength(8) password: string;
+export interface CourierTrackingStatus {
+  status: string;
+  estimatedDelivery?: Date;
+  lastEvent: string;
+  lastEventDate: Date;
 }
+
+export interface CreateShipmentResponse {
+  trackingNumber: string;
+  labelUrl?: string;
+}
+
+export interface CourierProvider {
+  createShipment(order: Order, customer: Customer): Promise<CreateShipmentResponse>;
+  trackShipment(trackingNumber: string): Promise<CourierTrackingStatus>;
+  cancelShipment(trackingNumber: string): Promise<void>;
+  getProviderName(): string;
+}
+
+export const COURIER_PROVIDER = 'COURIER_PROVIDER';
 ```
 
-`src/modules/accounts/dto/login.dto.ts`:
+## BostaProvider
 
+**src/modules/courier/providers/bosta.provider.ts:**
+- Injects ConfigService for `BOSTA_API_KEY` and `BOSTA_BASE_URL`
+- Implements CourierProvider
+- `createShipment`: POST to `${baseUrl}/shipments` with Bosta's API format:
+  ```javascript
+  { type: 10 (last mile), spec: { address: customer.street, city: customer.governorate, district: customer.district }, notes: `Order ${order.id}`, receiver: { firstName: customer.name.split(' ')[0], lastName: customer.name.split(' ').slice(1).join(' '), phone: customer.phone }, cod: parseFloat(order.totalAmount) }
+  ```
+  Headers: `{ 'X-API-KEY': apiKey, 'Content-Type': 'application/json' }`
+  Response mapping: extract `trackingNumber` and `labelUrl` from Bosta response
+- `trackShipment`: GET `${baseUrl}/shipments/${trackingNumber}`
+  Map Bosta statuses: 'PENDING' → 'PENDING', 'IN_TRANSIT' → 'SHIPPED', 'DELIVERED' → 'DELIVERED', 'RETURNED' → 'RETURNED'
+- `cancelShipment`: PUT `${baseUrl}/shipments/${trackingNumber}/cancel`
+- `getProviderName`: return `'bosta'`
+
+## MylerzProvider
+
+**src/modules/courier/providers/mylerz.provider.ts:**
+- Same pattern as BostaProvider
+- Injects `MYLERZ_API_KEY` and `MYLERZ_BASE_URL`
+- Different API format for Mylerz
+- `createShipment`: POST with Mylerz's payload format
+- `trackShipment`, `cancelShipment`
+- `getProviderName`: return `'mylerz'`
+
+## CourierService
+
+**src/modules/courier/courier.service.ts:**
+- Holds a Map of provider name → CourierProvider, populated by injecting `@Inject(COURIER_PROVIDER) private providers: CourierProvider[]`
+- `createShipment(accountId: string, orderId: string)`:
+  1. Load Order + Customer by IDs (scoped to accountId)
+  2. Resolve provider from `order.courierProvider` (lowercased)
+  3. Call provider.createShipment(order, customer)
+  4. Save trackingNumber on Order
+  5. Return tracking info
+- `handleWebhook(providerName: string, payload: any)`:
+  1. Parse courier-specific payload
+  2. Map status to OrderStatus
+  3. Update Order.status and courierTracking
+
+## RemittanceService
+
+**src/modules/courier/remittance.service.ts:**
+- Injects `Repository<CourierRemittance>` and `Repository<CourierRemittanceLine>`
+- `findAll(accountId)`: List all remittances for account
+- `findOne(accountId, id)`: Get remittance with lines
+- `reconcile(accountId, id)`: For each line, compare `order.totalAmount` to remitted amount, update status to SETTLED if matched
+
+## CourierController
+
+**src/modules/courier/courier.controller.ts:**
 ```typescript
-import { IsEmail, IsString } from 'class-validator';
-export class LoginDto {
-  @IsEmail() email: string;
-  @IsString() password: string;
-}
-```
-
-`src/modules/accounts/dto/invite-user.dto.ts`:
-
-```typescript
-import { IsEmail, IsEnum } from 'class-validator';
-import { UserRole } from '../../../common/enums';
-export class InviteUserDto {
-  @IsEmail() email: string;
-  @IsEnum(UserRole) role: UserRole;
-}
-```
-
-- [ ] **Step 4: Create JWT strategy**
-
-`src/modules/accounts/jwt.strategy.ts`:
-
-```typescript
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
-import { Account } from './entities/account.entity';
-
-@Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+@Controller('courier')
+export class CourierController {
   constructor(
-    config: ConfigService,
-    @InjectRepository(User) private userRepo: Repository<User>,
-    @InjectRepository(Account) private accountRepo: Repository<Account>,
-  ) {
-    super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: config.get('JWT_SECRET'),
-    });
-  }
-  async validate(payload: { sub: string; accountId: string; role: string }) {
-    const user = await this.userRepo.findOne({ where: { id: payload.sub } });
-    if (!user) throw new UnauthorizedException();
-    const account = await this.accountRepo.findOne({
-      where: { id: payload.accountId },
-    });
-    return {
-      id: user.id,
-      accountId: user.accountId,
-      role: user.role,
-      accountStatus: account?.status,
-    };
-  }
-}
-```
-
-- [ ] **Step 5: Create AuthService**
-
-`src/modules/accounts/auth.service.ts`:
-
-```typescript
-import {
-  Injectable,
-  ConflictException,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import { Account } from './entities/account.entity';
-import { User } from './entities/user.entity';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
-import { AccountStatus, UserRole } from '../../common/enums';
-
-@Injectable()
-export class AuthService {
-  constructor(
-    @InjectRepository(Account) private accountRepo: Repository<Account>,
-    @InjectRepository(User) private userRepo: Repository<User>,
-    private jwtService: JwtService,
+    private courierService: CourierService,
+    private remittanceService: RemittanceService,
   ) {}
 
-  async register(dto: RegisterDto) {
-    const existing = await this.userRepo.findOne({
-      where: { email: dto.email },
-    });
-    if (existing) throw new ConflictException('Email already in use');
-    const account = this.accountRepo.create({ businessName: dto.businessName });
-    await this.accountRepo.save(account);
-    const passwordHash = await bcrypt.hash(dto.password, 12);
-    const user = this.userRepo.create({
-      accountId: account.id,
-      email: dto.email,
-      passwordHash,
-      role: UserRole.OWNER,
-    });
-    await this.userRepo.save(user);
-    return this.generateToken(user, account);
+  @Post('shipments')
+  createShipment(@CurrentAccount() user: RequestUser, @Body() dto: CreateShipmentDto) {
+    return this.courierService.createShipment(user.accountId, dto.orderId);
   }
 
-  async login(dto: LoginDto) {
-    const user = await this.userRepo.findOne({ where: { email: dto.email } });
-    if (!user) throw new UnauthorizedException('Invalid credentials');
-    const valid = await bcrypt.compare(dto.password, user.passwordHash);
-    if (!valid) throw new UnauthorizedException('Invalid credentials');
-    const account = await this.accountRepo.findOne({
-      where: { id: user.accountId },
-    });
-    return this.generateToken(user, account);
+  @Post('webhooks/bosta')
+  @Public()  // skip auth
+  handleBostaWebhook(@Body() payload: any) {
+    return this.courierService.handleWebhook('bosta', payload);
   }
 
-  private generateToken(user: User, account: Account) {
-    return {
-      accessToken: this.jwtService.sign({
-        sub: user.id,
-        accountId: user.accountId,
-        role: user.role,
-      }),
-      accountId: user.accountId,
-      accountStatus: account.status,
-    };
+  @Post('webhooks/mylerz')
+  @Public()  // skip auth
+  handleMylerzWebhook(@Body() payload: any) {
+    return this.courierService.handleWebhook('mylerz', payload);
+  }
+
+  @Get('remittances')
+  getRemittances(@CurrentAccount() user: RequestUser) {
+    return this.remittanceService.findAll(user.accountId);
+  }
+
+  @Get('remittances/:id')
+  getRemittance(@CurrentAccount() user: RequestUser, @Param('id') id: string) {
+    return this.remittanceService.findOne(user.accountId, id);
   }
 }
 ```
 
-- [ ] **Step 6: Create AuthController**
-
-`src/modules/accounts/auth.controller.ts`:
-
+**Note on @Public()**: NestJS doesn't have a built-in @Public() decorator. Create one at `src/common/decorators/public.decorator.ts`:
 ```typescript
-import { Controller, Post, Body } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
-
-@Controller('auth')
-export class AuthController {
-  constructor(private authService: AuthService) {}
-  @Post('register') register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
-  }
-  @Post('login') login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
-  }
-}
+import { SetMetadata } from '@nestjs/common';
+export const IS_PUBLIC_KEY = 'isPublic';
+export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 ```
 
-- [ ] **Step 7: Create AccountsService + Controller**
-
-`src/modules/accounts/accounts.service.ts`:
-
+Then update `AuthGuard` in `src/common/guards/auth.guard.ts` to skip when `IS_PUBLIC_KEY` is set:
 ```typescript
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
-import { InviteUserDto } from './dto/invite-user.dto';
-
-@Injectable()
-export class AccountsService {
-  constructor(@InjectRepository(User) private userRepo: Repository<User>) {}
-  async inviteUser(accountId: string, dto: InviteUserDto) {
-    const user = this.userRepo.create({
-      accountId,
-      email: dto.email,
-      passwordHash: 'CHANGE_ME',
-      role: dto.role,
-    });
-    return this.userRepo.save(user);
-  }
-}
+import { Reflector } from '@nestjs/core';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+// In handleRequest or canActivate — check reflector
 ```
 
-`src/modules/accounts/accounts.controller.ts`:
+Actually, the simpler approach: The webhooks don't use any auth. Just have them be plain routes without JWT. Since the global AuthGuard applies, you need to add the `@Public()` decorator approach (more idiomatic) or use `@SkipAuth()` — let me clarify.
 
-```typescript
-import { Controller, Post, Body } from '@nestjs/common';
-import { AccountsService } from './accounts.service';
-import { InviteUserDto } from './dto/invite-user.dto';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { CurrentAccount } from '../../common/decorators/current-account.decorator';
-import { UserRole } from '../../common/enums';
+Use the standard NestJS approach:
+1. Create `src/common/decorators/public.decorator.ts`
+2. Modify `AuthGuard` to check `this.reflector.getAllAndOverride(IS_PUBLIC_KEY, [context.getHandler(), context.getClass()])` and return true if set.
+3. Add `Reflector` injection to AuthGuard constructor.
 
-@Controller('accounts')
-export class AccountsController {
-  constructor(private accountsService: AccountsService) {}
-  @Post('invite')
-  @Roles(UserRole.OWNER)
-  invite(@CurrentAccount() user: any, @Body() dto: InviteUserDto) {
-    return this.accountsService.inviteUser(user.accountId, dto);
-  }
-}
-```
+## CourierModule
 
-- [ ] **Step 8: Create AccountsModule**
-
-`src/modules/accounts/accounts.module.ts`:
-
+**src/modules/courier/courier.module.ts:**
 ```typescript
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Account } from './entities/account.entity';
-import { User } from './entities/user.entity';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
-import { AccountsService } from './accounts.service';
-import { AccountsController } from './accounts.controller';
-import { JwtStrategy } from './jwt.strategy';
+import { CourierController } from './courier.controller';
+import { CourierService } from './courier.service';
+import { RemittanceService } from './remittance.service';
+import { BostaProvider } from './providers/bosta.provider';
+import { MylerzProvider } from './providers/mylerz.provider';
+import { COURIER_PROVIDER } from './interfaces/courier-provider.interface';
+import { CourierRemittance } from './entities/courier-remittance.entity';
+import { CourierRemittanceLine } from './entities/courier-remittance-line.entity';
+import { Order } from '../orders/entities/order.entity';
+import { Customer } from '../customers/entities/customer.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Account, User]),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        secret: config.get('JWT_SECRET'),
-        signOptions: { expiresIn: config.get('JWT_EXPIRES_IN') || '7d' },
-      }),
-    }),
+    TypeOrmModule.forFeature([CourierRemittance, CourierRemittanceLine, Order, Customer]),
   ],
-  controllers: [AuthController, AccountsController],
-  providers: [AuthService, AccountsService, JwtStrategy],
+  controllers: [CourierController],
+  providers: [
+    CourierService,
+    RemittanceService,
+    BostaProvider,
+    MylerzProvider,
+    {
+      provide: COURIER_PROVIDER,
+      useFactory: (bosta: BostaProvider, mylerz: MylerzProvider) => [bosta, mylerz],
+      inject: [BostaProvider, MylerzProvider],
+    },
+  ],
 })
-export class AccountsModule {}
+export class CourierModule {}
 ```
 
-- [ ] **Step 9: Write auth tests**
+## DTOs
 
-`tests/unit/auth.service.spec.ts`:
+**src/modules/courier/dto/create-shipment.dto.ts:**
+```typescript
+import { IsString } from 'class-validator';
+export class CreateShipmentDto {
+  @IsString() orderId: string;
+}
+```
 
+**src/modules/courier/dto/courier-webhook.dto.ts:**
+```typescript
+export class BostaWebhookPayload {
+  type: string;
+  data: {
+    _id: string;
+    trackingNumber: string;
+    status: string;
+    [key: string]: any;
+  };
+}
+
+export class MylerzWebhookPayload {
+  awb: string;
+  status: string;
+  [key: string]: any;
+}
+```
+
+## Tests
+
+Create `tests/unit/courier/bosta.provider.spec.ts`:
 ```typescript
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { JwtService } from '@nestjs/jwt';
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-import { AuthService } from '../../src/modules/accounts/auth.service';
-import { Account } from '../../src/modules/accounts/entities/account.entity';
-import { User } from '../../src/modules/accounts/entities/user.entity';
+import { ConfigService } from '@nestjs/config';
+import { BostaProvider } from '../../src/modules/courier/providers/bosta.provider';
 
-describe('AuthService', () => {
-  let service: AuthService;
-  let accountRepo: any;
-  let userRepo: any;
-
-  const mockAccount = { id: 'acc-1', businessName: 'Test', status: 'TRIALING' };
-  const mockUser = {
-    id: 'usr-1',
-    accountId: 'acc-1',
-    email: 'test@example.com',
-    passwordHash: 'hashed',
-    role: 'OWNER',
-  };
+describe('BostaProvider', () => {
+  let provider: BostaProvider;
 
   beforeEach(async () => {
-    accountRepo = {
-      create: jest.fn().mockReturnValue(mockAccount),
-      save: jest.fn().mockResolvedValue(mockAccount),
-      findOne: jest.fn().mockResolvedValue(mockAccount),
-    };
-    userRepo = {
-      create: jest.fn().mockReturnValue(mockUser),
-      save: jest.fn().mockResolvedValue(mockUser),
-      findOne: jest.fn().mockResolvedValue(null),
-    };
-    const module: TestingModule = await Test.createTestingModule({
+    const module = await Test.createTestingModule({
       providers: [
-        AuthService,
-        { provide: getRepositoryToken(Account), useValue: accountRepo },
-        { provide: getRepositoryToken(User), useValue: userRepo },
-        {
-          provide: JwtService,
-          useValue: { sign: jest.fn().mockReturnValue('token-123') },
-        },
+        BostaProvider,
+        { provide: ConfigService, useValue: { get: jest.fn().mockReturnValue('test-key') } },
       ],
     }).compile();
-    service = module.get<AuthService>(AuthService);
+    provider = module.get<BostaProvider>(BostaProvider);
   });
 
-  it('should register a new account with owner user', async () => {
-    userRepo.findOne.mockResolvedValue(null);
-    const result = await service.register({
-      businessName: 'Test',
-      email: 'test@example.com',
-      password: 'password123',
+  it('should create shipment and return tracking number', async () => {
+    const mockFetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: { trackingNumber: 'BOSTA-123', labelUrl: 'https://bosta.com/label' } }),
     });
-    expect(result.accessToken).toBe('token-123');
+    (global as any).fetch = mockFetch;
+
+    const order = { id: 'ord-1', totalAmount: '100', courierProvider: 'bosta' } as any;
+    const customer = { name: 'Test User', phone: '01000000000', governorate: 'Cairo', district: 'Nasr City', street: 'Main St' } as any;
+    const result = await provider.createShipment(order, customer);
+    expect(result.trackingNumber).toBe('BOSTA-123');
   });
 
-  it('should throw ConflictException on duplicate email', async () => {
-    userRepo.findOne.mockResolvedValue(mockUser);
-    await expect(
-      service.register({
-        businessName: 'Test',
-        email: 'test@example.com',
-        password: 'password123',
-      }),
-    ).rejects.toThrow(ConflictException);
-  });
-
-  it('should login with valid credentials', async () => {
-    userRepo.findOne.mockResolvedValue(mockUser);
-    jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
-    const result = await service.login({
-      email: 'test@example.com',
-      password: 'password123',
-    });
-    expect(result.accessToken).toBe('token-123');
-  });
-
-  it('should throw UnauthorizedException on wrong password', async () => {
-    userRepo.findOne.mockResolvedValue(mockUser);
-    jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
-    await expect(
-      service.login({ email: 'test@example.com', password: 'wrong' }),
-    ).rejects.toThrow(UnauthorizedException);
-  });
+  it('should map Bosta status to internal status', async () => {});
+  it('should throw on API error', async () => {});
 });
 ```
 
-- [ ] **Step 10: Run tests**
+Create `tests/unit/courier/remittance.service.spec.ts`.
 
-```bash
-npx jest tests/unit/auth.service.spec.ts --verbose
+## Env additions
+```
+BOSTA_API_KEY=
+BOSTA_BASE_URL=https://api.bosta.com/v2
+MYLERZ_API_KEY=
+MYLERZ_BASE_URL=https://api.mylerz.com
 ```
 
-Expected: All 4 tests pass.
-
-- [ ] **Step 11: Build + Commit**
-
+## Commit
 ```bash
-npx nest build
-git add src/modules/accounts/ src/common/ tests/unit/auth.service.spec.ts
-git commit -m "feat: add auth module with JWT authentication and guards"
+git add src/modules/courier/ src/common/decorators/public.decorator.ts
+git commit -m "feat: add courier module with Bosta/Mylerz providers and remittance"
 ```
-
----

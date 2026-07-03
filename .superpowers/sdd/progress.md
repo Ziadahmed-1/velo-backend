@@ -9,3 +9,6 @@ Task 6: complete (commits efa546b, review clean)
 Task 7: complete (commits 3c9a03c, review clean)
 Task 8: complete (commit df20bab, tag phase-alpha-complete)
 Task 8: complete (commits df20bab, review pending)
+
+Task 1: complete (commits 9ac20da..25ae81f, review clean)
+Task 2: complete (commits 25ae81f..970d701, review clean)

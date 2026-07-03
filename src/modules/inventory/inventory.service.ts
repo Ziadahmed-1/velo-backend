@@ -14,6 +14,13 @@ export class InventoryService {
     private variantRepo: Repository<ProductVariant>,
   ) {}
 
+  /**
+   * Get current stock for a variant (sum of ledger entries).
+   * @param accountId - Tenant account ID
+   * @param variantId - Variant ID
+   * @returns Object with variantId and currentStock count
+   * @throws NotFoundException if variant not found
+   */
   async getStock(accountId: string, variantId: string) {
     const variant = await this.variantRepo.findOne({
       where: { id: variantId, accountId },
@@ -27,6 +34,13 @@ export class InventoryService {
     return { variantId, currentStock: parseInt(raw?.sum ?? '0') || 0 };
   }
 
+  /**
+   * Add a ledger entry (positive = restock, negative = adjustment).
+   * @param accountId - Tenant account ID
+   * @param dto - Stock adjustment payload
+   * @returns The created InventoryLedger entity
+   * @throws NotFoundException if variant not found
+   */
   async adjust(accountId: string, dto: AdjustStockDto) {
     const variant = await this.variantRepo.findOne({
       where: { id: dto.variantId, accountId },

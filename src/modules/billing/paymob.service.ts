@@ -4,6 +4,9 @@ import { Repository } from 'typeorm';
 import { SubscriptionInvoice } from './entities/subscription-invoice.entity';
 import { SubscriptionInvoiceStatus } from '../../common/enums';
 
+/**
+ * Payment gateway integration (stubbed — returns mock URLs).
+ */
 @Injectable()
 export class PaymobService {
   private readonly logger = new Logger(PaymobService.name);
@@ -13,6 +16,12 @@ export class PaymobService {
     private invoiceRepo: Repository<SubscriptionInvoice>,
   ) {}
 
+  /**
+   * Create a mock Paymob payment for an invoice.
+   * Marks the invoice as ISSUED and returns a simulated checkout URL.
+   * @param invoiceId - Invoice ID to pay
+   * @returns Payment URL and invoice ID
+   */
   async createPayment(invoiceId: string) {
     const invoice = await this.invoiceRepo.findOne({
       where: { id: invoiceId },
@@ -29,6 +38,12 @@ export class PaymobService {
     return { paymentUrl: mockPaymentUrl, invoiceId };
   }
 
+  /**
+   * Mock verify a payment by its provider reference.
+   * Marks the invoice as PAID.
+   * @param paymentRef - Payment provider reference
+   * @returns Verification result with mock transaction ID
+   */
   async verifyPayment(paymentRef: string) {
     this.logger.log(`Mock verifying payment: ${paymentRef}`);
 
@@ -46,6 +61,12 @@ export class PaymobService {
     return { success: true, transactionId: `mock-txn-${paymentRef}` };
   }
 
+  /**
+   * Handle incoming Paymob webhook callbacks.
+   * Parses the webhook payload and verifies the associated payment.
+   * @param body - Raw webhook payload
+   * @returns Success confirmation
+   */
   async handleWebhook(body: Record<string, any>) {
     this.logger.debug(
       `Paymob webhook: ${JSON.stringify(body).substring(0, 200)}`,

@@ -9,17 +9,36 @@ export class CustomersService {
   constructor(
     @InjectRepository(Customer) private customerRepo: Repository<Customer>,
   ) {}
+
+  /**
+   * Create a new customer.
+   * @param accountId - Tenant account ID
+   * @param dto - Customer creation payload
+   * @returns The created Customer entity
+   */
   async create(accountId: string, dto: CreateCustomerDto) {
     return this.customerRepo.save(
       this.customerRepo.create({ ...dto, accountId }),
     );
   }
+  /**
+   * List all customers for the given account.
+   * @param accountId - Tenant account ID
+   * @returns Array of Customer entities
+   */
   async findAll(accountId: string) {
     return this.customerRepo.find({
       where: { accountId },
       order: { createdAt: 'DESC' },
     });
   }
+  /**
+   * Get a customer by ID.
+   * @param accountId - Tenant account ID
+   * @param id - Customer ID
+   * @returns The Customer entity
+   * @throws NotFoundException if not found
+   */
   async findOne(accountId: string, id: string) {
     const c = await this.customerRepo.findOne({ where: { id, accountId } });
     if (!c) throw new NotFoundException('Customer not found');

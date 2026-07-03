@@ -1,5 +1,7 @@
 export class WhatsAppWebhookPayload {
+  /** Object type identifier from 360dialog */
   object: string;
+  /** Array of webhook entries */
   entry?: Array<{
     id: string;
     changes?: Array<{

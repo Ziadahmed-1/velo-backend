@@ -21,6 +21,13 @@ export class PasteParseService {
     private suggestedItemRepo: Repository<SuggestedItem>,
   ) {}
 
+  /**
+   * Parse raw text into a complete draft order.
+   * Orchestrates extraction, catalog matching, customer upsert, and draft order creation with SuggestedItem upserts.
+   * @param accountId - Merchant account ID
+   * @param dto - Paste parse input DTO
+   * @returns Created draft Order
+   */
   async parse(accountId: string, dto: PasteParseDto) {
     const extracted = await this.extractionService.extractFromText(dto.text);
 

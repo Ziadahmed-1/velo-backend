@@ -5,6 +5,9 @@ import { UsagePeriod } from './entities/usage-period.entity';
 import { Subscription } from './entities/subscription.entity';
 import { Order } from '../orders/entities/order.entity';
 
+/**
+ * Calculate overage fees when order count exceeds plan limit.
+ */
 @Injectable()
 export class OverageService {
   constructor(
@@ -13,6 +16,12 @@ export class OverageService {
     @InjectRepository(Order) private orderRepo: Repository<Order>,
   ) {}
 
+  /**
+   * Calculate overage for a given subscription's current billing period.
+   * Counts non-draft orders created between periodStart and periodEnd.
+   * @param subscriptionId - Subscription ID
+   * @returns Overage details including overage orders and amount
+   */
   async calculate(subscriptionId: string) {
     const subscription = await this.subRepo.findOne({
       where: { id: subscriptionId },
@@ -45,6 +54,11 @@ export class OverageService {
     };
   }
 
+  /**
+   * Record overage data for a subscription's current usage period.
+   * Updates existing period record or creates a new one.
+   * @param subscriptionId - Subscription ID
+   */
   async recordOverage(subscriptionId: string) {
     const subscription = await this.subRepo.findOne({
       where: { id: subscriptionId },

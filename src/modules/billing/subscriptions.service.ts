@@ -11,6 +11,9 @@ import { Plan } from './entities/plan.entity';
 import { PlansService } from './plans.service';
 import { SubscriptionStatus } from '../../common/enums';
 
+/**
+ * Manage merchant subscriptions, plan changes.
+ */
 @Injectable()
 export class SubscriptionsService {
   constructor(
@@ -19,6 +22,13 @@ export class SubscriptionsService {
     private plansService: PlansService,
   ) {}
 
+  /**
+   * Create a new subscription for an account.
+   * Auto-assigns Trial plan if no planId is provided.
+   * @param accountId - Tenant account ID
+   * @param planId - Optional plan ID to subscribe to
+   * @returns The created Subscription with plan relation
+   */
   async create(accountId: string, planId?: string) {
     const existing = await this.subRepo.findOne({ where: { accountId } });
     if (existing)
@@ -67,6 +77,11 @@ export class SubscriptionsService {
     });
   }
 
+  /**
+   * Get the current active subscription for an account.
+   * @param accountId - Tenant account ID
+   * @returns The Subscription with plan relation
+   */
   async getCurrent(accountId: string) {
     const sub = await this.subRepo.findOne({
       where: { accountId },
@@ -76,6 +91,12 @@ export class SubscriptionsService {
     return sub;
   }
 
+  /**
+   * Change the plan on an existing subscription.
+   * @param accountId - Tenant account ID
+   * @param planId - Target plan ID
+   * @returns Updated Subscription with plan relation
+   */
   async changePlan(accountId: string, planId: string) {
     const subscription = await this.subRepo.findOne({ where: { accountId } });
     if (!subscription)

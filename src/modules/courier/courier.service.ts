@@ -27,6 +27,13 @@ export class CourierService {
     }
   }
 
+  /**
+   * Create a shipment via the configured courier provider.
+   * Loads the order, resolves the provider, creates the shipment, and saves tracking info.
+   * @param accountId - Merchant account ID
+   * @param orderId - Order ID to ship
+   * @returns Shipment creation result with tracking number
+   */
   async createShipment(accountId: string, orderId: string) {
     const order = await this.orderRepo.findOne({
       where: { id: orderId, accountId },
@@ -56,6 +63,13 @@ export class CourierService {
     return result;
   }
 
+  /**
+   * Handle incoming webhook from a courier provider.
+   * Parses the provider-specific payload and updates the order status accordingly.
+   * @param providerName - Courier provider name (bosta or mylerz)
+   * @param payload - Raw webhook payload
+   * @returns Acknowledgment response
+   */
   async handleWebhook(providerName: string, payload: unknown) {
     let trackingNumber: string | undefined;
     let status: string | undefined;
