@@ -9,6 +9,7 @@ export enum AccountStatus {
 export enum UserRole {
   OWNER = 'OWNER',
   STAFF = 'STAFF',
+  ADMIN = 'ADMIN',
 }
 
 export enum LedgerReason {
