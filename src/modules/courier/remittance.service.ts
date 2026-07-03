@@ -41,20 +41,9 @@ export class RemittanceService {
       throw new NotFoundException('Remittance not found');
     }
 
-    let allSettled = true;
-
-    for (const line of remittance.lines) {
-      const expected = parseFloat(line.expectedAmount);
-      const received = parseFloat(line.receivedAmount);
-
-      if (expected === received) {
-        await this.lineRepo.update(line.id, {
-          receivedAmount: line.receivedAmount,
-        });
-      } else {
-        allSettled = false;
-      }
-    }
+    const allSettled = remittance.lines.every((line) => {
+      return parseFloat(line.expectedAmount) === parseFloat(line.receivedAmount);
+    });
 
     if (allSettled) {
       await this.remittanceRepo.update(id, {

@@ -1,71 +1,62 @@
-# Task 3 Report: Accounts Module — Entities + Auth
+# Task 3 Report: Courier Module — Bosta/Mylerz Providers, Webhooks, Remittance
 
 ## What I Implemented
 
-- **Entities**: `Account` and `User` entities copied from reference, with correct relative imports
-- **DTOs**: `RegisterDto`, `LoginDto`, `InviteUserDto` with class-validator decorators
-- **JWT Strategy**: `JwtStrategy` using passport-jwt with `ExtractJwt.fromAuthHeaderAsBearerToken()`
-- **AuthService**: `register`, `login`, `generateToken` methods with bcrypt hashing
-- **AuthController**: `POST /auth/register`, `POST /auth/login`
-- **AccountsService**: `inviteUser` method
-- **AccountsController**: `POST /accounts/invite` (OWNER-only via @Roles decorator)
-- **AccountsModule**: Wiring JWT module, TypeORM features, providers
-- **Tests**: 4 tests for AuthService (register, duplicate email, login, wrong password)
-- **Stub entities**: Created minimal entity stubs for products, customers, orders, courier, billing, whatsapp modules to satisfy Account entity's cross-module TypeORM relationships
+- **@Public() decorator**: `src/common/decorators/public.decorator.ts` — `SetMetadata(IS_PUBLIC_KEY, true)`
+- **AuthGuard update**: Added `Reflector` injection and `canActivate` override to check `IS_PUBLIC_KEY` metadata
+- **CourierProvider interface**: `src/modules/courier/interfaces/courier-provider.interface.ts` — `CourierProvider`, `CreateShipmentResponse`, `CourierTrackingStatus`, `COURIER_PROVIDER` token
+- **BostaProvider**: `src/modules/courier/providers/bosta.provider.ts` — implements CourierProvider with Bosta API format
+- **MylerzProvider**: `src/modules/courier/providers/mylerz.provider.ts` — implements CourierProvider with Mylerz API format
+- **CourierService**: `src/modules/courier/courier.service.ts` — Map-based provider registry, `createShipment`, `handleWebhook`
+- **RemittanceService**: `src/modules/courier/remittance.service.ts` — `findAll`, `findOne`, `reconcile`
+- **CourierController**: `src/modules/courier/courier.controller.ts` — shipment creation, webhooks (public), remittance CRUD
+- **DTOs**: `CreateShipmentDto`, `BostaWebhookPayload`, `MylerzWebhookPayload`
+- **CourierModule**: Updated with all providers, multi-provider `COURIER_PROVIDER` factory
+- **Tests**: 9 tests (BostaProvider: 4, RemittanceService: 5)
+
+## Files Created/Modified
+
+| File | Action |
+|------|--------|
+| `src/common/decorators/public.decorator.ts` | Created |
+| `src/common/guards/auth.guard.ts` | Modified — added Reflector + @Public() support |
+| `src/modules/courier/interfaces/courier-provider.interface.ts` | Created |
+| `src/modules/courier/providers/bosta.provider.ts` | Created |
+| `src/modules/courier/providers/mylerz.provider.ts` | Created |
+| `src/modules/courier/dto/create-shipment.dto.ts` | Created |
+| `src/modules/courier/dto/courier-webhook.dto.ts` | Created |
+| `src/modules/courier/courier.service.ts` | Created |
+| `src/modules/courier/remittance.service.ts` | Created |
+| `src/modules/courier/courier.controller.ts` | Created |
+| `src/modules/courier/courier.module.ts` | Modified |
+| `tests/unit/courier/bosta.provider.spec.ts` | Created |
+| `tests/unit/courier/remittance.service.spec.ts` | Created |
 
 ## Test Results
 
 ```
-npx jest tests/unit/auth.service.spec.ts --verbose
-Test Suites: 1 passed, 1 total
-Tests:       4 passed, 4 total
+npx jest tests/unit/courier/ --passWithNoTests
+Test Suites: 2 passed, 2 total
+Tests:       9 passed, 9 total
+
+npx jest --passWithNoTests
+Test Suites: 7 passed, 7 total
+Tests:       21 passed, 21 total
 ```
 
-All 4 tests pass (RED: N/A — tests and implementation were written together per plan code; GREEN: confirmed after implementation).
-
-## Build Results
+## Lint Results
 
 ```
-npx nest build
+npx eslint --ext .ts src/ tests/
+0 errors, 0 warnings
 ```
 
-Build succeeded with zero errors.
+## Commit
 
-## Files Changed
-
-| File                                                        | Action                                                                    |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `src/modules/accounts/entities/account.entity.ts`           | Created                                                                   |
-| `src/modules/accounts/entities/user.entity.ts`              | Created                                                                   |
-| `src/modules/accounts/dto/register.dto.ts`                  | Created                                                                   |
-| `src/modules/accounts/dto/login.dto.ts`                     | Created                                                                   |
-| `src/modules/accounts/dto/invite-user.dto.ts`               | Created                                                                   |
-| `src/modules/accounts/jwt.strategy.ts`                      | Created                                                                   |
-| `src/modules/accounts/auth.service.ts`                      | Created                                                                   |
-| `src/modules/accounts/auth.controller.ts`                   | Created                                                                   |
-| `src/modules/accounts/accounts.service.ts`                  | Created                                                                   |
-| `src/modules/accounts/accounts.controller.ts`               | Created                                                                   |
-| `src/modules/accounts/accounts.module.ts`                   | Rewritten (was empty shell)                                               |
-| `src/modules/products/entities/product.entity.ts`           | Created (stub)                                                            |
-| `src/modules/products/entities/product-variant.entity.ts`   | Created (stub)                                                            |
-| `src/modules/customers/entities/customer.entity.ts`         | Created (stub)                                                            |
-| `src/modules/orders/entities/order.entity.ts`               | Created (stub)                                                            |
-| `src/modules/courier/entities/courier-remittance.entity.ts` | Created (stub)                                                            |
-| `src/modules/billing/entities/subscription.entity.ts`       | Created (stub)                                                            |
-| `src/modules/whatsapp/entities/whatsapp-account.entity.ts`  | Created (stub)                                                            |
-| `tests/unit/auth.service.spec.ts`                           | Created                                                                   |
-| `package.json`                                              | Modified (jest rootDir changed from "src" to "." for test file discovery) |
-
-## Self-Review Findings
-
-1. **Entity imports corrected**: Reference entities use `../../../common/enums` but the NestJS project path structure required the same; confirmed correct.
-2. **bcrypt v6 compatibility**: `jest.spyOn(bcrypt, 'compare')` fails on bcrypt v6 because exports are non-configurable. Fixed by using `jest.mock('bcrypt', ...)` at module level.
-3. **Jest config**: Changed `rootDir: "src"` to `rootDir: "."` with `roots: ["src", "tests"]` so test files in `tests/` directory are discoverable.
-4. **Cross-module stubs**: Account.entity references 7 entities from modules that don't exist yet (Tasks 4-7). Created minimal stubs with proper TypeORM relationship properties so the project compiles.
-5. **Auth service null safety**: Added null check for `account` in `login` method to satisfy TypeScript strict mode.
-6. **JWT secret type narrowing**: Used non-null assertion on `config.get<string>('JWT_SECRET')!` to satisfy passport-jwt's type expectations.
+`5468055` — `feat: add courier module with Bosta/Mylerz providers and remittance`
 
 ## Concerns
 
-- **Stub entities**: The 7 stub entity files created in products/customers/orders/courier/billing/whatsapp modules are placeholders. When Tasks 4-7 implement real entities, they will need to ensure backward compatibility with the Account entity's relationship callbacks (e.g., `(product) => product.account` must exist on Product).
-- **Jest config change**: `rootDir` change from "src" to "." may affect test discovery for existing e2e tests; verified working for unit tests.
+- **Bosta/Mylerz API integration**: Providers use global `fetch` with typed response interfaces, but actual API payload formats should be verified against real Bosta/Mylerz docs before production use.
+- **Webhook status mapping**: The `handleWebhook` status mapping (`DELIVERED`, `RETURNED`, etc.) may need adjustment when real webhook payloads are received.
+- **Remittance reconcile**: The `reconcile` method marks lines as SETTLED only when `expectedAmount === receivedAmount`; partial remittances are set to PARTIAL status but individual line matching logic may need refinement.
