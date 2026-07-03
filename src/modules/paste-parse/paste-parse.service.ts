@@ -17,7 +17,6 @@ export class PasteParseService {
     private catalogMatcherService: CatalogMatcherService,
     private dataSource: DataSource,
     @InjectRepository(Customer) private customerRepo: Repository<Customer>,
-    @InjectRepository(Order) private orderRepo: Repository<Order>,
     @InjectRepository(SuggestedItem)
     private suggestedItemRepo: Repository<SuggestedItem>,
   ) {}

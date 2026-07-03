@@ -59,4 +59,41 @@ describe('CatalogMatcherService', () => {
     expect(result[0].matchStatus).toBe('HIGH_CONFIDENCE');
     expect(result[0].matchedVariantId).toBe('v1');
   });
+
+  it('should return alternatives when no exact match', async () => {
+    const mockFetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify([
+                {
+                  extractedName: 'مشروب غامض',
+                  matchStatus: 'AMBIGUOUS',
+                  matchedVariantId: null,
+                  matchConfidence: 40,
+                  suggestedAlternatives: [
+                    { variantId: 'v1', name: 'شاي عدني', price: '25' },
+                    { variantId: 'v2', name: 'قهوة سادة', price: '30' },
+                  ],
+                  quantity: 1,
+                  price: '0',
+                },
+              ]),
+            },
+          },
+        ],
+      }),
+    });
+    (global as { fetch: unknown }).fetch = mockFetch;
+
+    const result = await service.matchItems('acc-1', [
+      { name: 'مشروب غامض', qty: 1, price: '0' },
+    ]);
+    expect(result[0].matchStatus).toBe('AMBIGUOUS');
+    expect(result[0].matchedVariantId).toBeNull();
+    expect(result[0].suggestedAlternatives).toHaveLength(2);
+    expect(result[0].suggestedAlternatives[0].variantId).toBe('v1');
+  });
 });

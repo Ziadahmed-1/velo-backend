@@ -48,6 +48,8 @@ describe('ExtractionService', () => {
     });
     (global as { fetch: unknown }).fetch = mockFetch;
 
-    await expect(service.extractFromText('test')).rejects.toThrow();
+    await expect(service.extractFromText('test')).rejects.toThrow(
+      'Extraction service unavailable',
+    );
   });
 });
