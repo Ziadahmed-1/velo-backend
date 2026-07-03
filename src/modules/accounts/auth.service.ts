@@ -11,7 +11,7 @@ import { Account } from './entities/account.entity';
 import { User } from './entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { AccountStatus, UserRole } from '../../common/enums';
+import { UserRole } from '../../common/enums';
 
 @Injectable()
 export class AuthService {

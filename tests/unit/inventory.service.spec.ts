@@ -4,21 +4,27 @@ import { NotFoundException } from '@nestjs/common';
 import { InventoryService } from '../../src/modules/inventory/inventory.service';
 import { InventoryLedger } from '../../src/modules/inventory/entities/inventory-ledger.entity';
 import { ProductVariant } from '../../src/modules/products/entities/product-variant.entity';
+import { LedgerReason } from '../../src/common/enums';
 
 describe('InventoryService', () => {
   let service: InventoryService;
-  let ledgerRepo: any;
-  let variantRepo: any;
+  let ledgerRepo: {
+    create: jest.Mock;
+    save: jest.Mock;
+    createQueryBuilder: jest.Mock;
+  };
+  let variantRepo: { findOne: jest.Mock };
 
   beforeEach(async () => {
+    const queryBuilder = {
+      select: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      getRawOne: jest.fn().mockResolvedValue({ sum: '10' }),
+    };
     ledgerRepo = {
       create: jest.fn().mockReturnValue({}),
       save: jest.fn().mockResolvedValue({ id: 'entry-1', quantity: 10 }),
-      createQueryBuilder: jest.fn(() => ({
-        select: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        getRawOne: jest.fn().mockResolvedValue({ sum: '10' }),
-      })),
+      createQueryBuilder: jest.fn().mockReturnValue(queryBuilder),
     };
     variantRepo = {
       findOne: jest.fn().mockResolvedValue({ id: 'var-1', accountId: 'acc-1' }),
@@ -39,10 +45,10 @@ describe('InventoryService', () => {
   });
 
   it('should add a ledger entry on stock adjust', async () => {
-    const result = await service.adjust('acc-1', {
+    await service.adjust('acc-1', {
       variantId: 'var-1',
       quantity: 10,
-      reason: 'INITIAL_RESTOCK' as any,
+      reason: LedgerReason.INITIAL_RESTOCK,
     });
     expect(ledgerRepo.create).toHaveBeenCalled();
     expect(ledgerRepo.save).toHaveBeenCalled();
@@ -54,7 +60,7 @@ describe('InventoryService', () => {
       service.adjust('other-acc', {
         variantId: 'var-1',
         quantity: 5,
-        reason: 'MANUAL_ADJUSTMENT' as any,
+        reason: LedgerReason.MANUAL_ADJUSTMENT,
       }),
     ).rejects.toThrow(NotFoundException);
   });

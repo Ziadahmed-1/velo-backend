@@ -10,7 +10,10 @@ import { AccountStatus } from '../enums';
 @Injectable()
 export class SubscriptionGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
-    const { user, method } = context.switchToHttp().getRequest();
+    const { user, method } = context.switchToHttp().getRequest<{
+      user: { accountStatus: AccountStatus };
+      method: string;
+    }>();
     if (['POST', 'PATCH', 'DELETE', 'PUT'].includes(method)) {
       if (user.accountStatus === AccountStatus.SUSPENDED) {
         throw new HttpException(

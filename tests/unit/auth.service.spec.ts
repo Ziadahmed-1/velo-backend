@@ -15,8 +15,8 @@ import * as bcrypt from 'bcrypt';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let accountRepo: any;
-  let userRepo: any;
+  let accountRepo: Record<string, jest.Mock>;
+  let userRepo: Record<string, jest.Mock>;
 
   const mockAccount = { id: 'acc-1', businessName: 'Test', status: 'TRIALING' };
   const mockUser = {

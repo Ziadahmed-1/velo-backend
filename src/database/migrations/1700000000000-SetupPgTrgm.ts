@@ -7,5 +7,5 @@ export class SetupPgTrgm1700000000000 implements MigrationInterface {
     await qr.query('CREATE EXTENSION IF NOT EXISTS pg_trgm');
   }
 
-  async down(qr: QueryRunner): Promise<void> {}
+  async down(): Promise<void> {}
 }
