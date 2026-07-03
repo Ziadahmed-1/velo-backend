@@ -1,0 +1,83 @@
+export enum AccountStatus {
+  TRIALING = 'TRIALING',
+  ACTIVE = 'ACTIVE',
+  PAST_DUE = 'PAST_DUE',
+  SUSPENDED = 'SUSPENDED',
+  CANCELLED = 'CANCELLED',
+}
+
+export enum UserRole {
+  OWNER = 'OWNER',
+  STAFF = 'STAFF',
+}
+
+export enum LedgerReason {
+  INITIAL_RESTOCK = 'INITIAL_RESTOCK',
+  MANUAL_ADJUSTMENT = 'MANUAL_ADJUSTMENT',
+  ORDER_RESERVATION = 'ORDER_RESERVATION',
+  ORDER_CANCELLATION = 'ORDER_CANCELLATION',
+  RETURN_INSPECTION = 'RETURN_INSPECTION',
+  DAMAGED_WRITE_OFF = 'DAMAGED_WRITE_OFF',
+}
+
+export enum OrderStatus {
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  SHIPPED = 'SHIPPED',
+  DELIVERED = 'DELIVERED',
+  RETURNED = 'RETURNED',
+  CANCELLED = 'CANCELLED',
+}
+
+export enum CodStatus {
+  NOT_APPLICABLE = 'NOT_APPLICABLE',
+  PENDING_COLLECTION = 'PENDING_COLLECTION',
+  COLLECTED = 'COLLECTED',
+  REMITTED = 'REMITTED',
+  SHORT_PAID = 'SHORT_PAID',
+  DISPUTED = 'DISPUTED',
+}
+
+export enum OrderSourceChannel {
+  MANUAL = 'MANUAL',
+  PASTE_PARSE = 'PASTE_PARSE',
+  WHATSAPP_AUTO = 'WHATSAPP_AUTO',
+}
+
+export enum RemittanceStatus {
+  PENDING = 'PENDING',
+  PARTIAL = 'PARTIAL',
+  SETTLED = 'SETTLED',
+  DISPUTED = 'DISPUTED',
+}
+
+export enum BillingInterval {
+  MONTHLY = 'MONTHLY',
+  YEARLY = 'YEARLY',
+}
+
+export enum SubscriptionStatus {
+  TRIALING = 'TRIALING',
+  ACTIVE = 'ACTIVE',
+  PAST_DUE = 'PAST_DUE',
+  CANCELLED = 'CANCELLED',
+}
+
+export enum SubscriptionInvoiceStatus {
+  DRAFT = 'DRAFT',
+  ISSUED = 'ISSUED',
+  PAID = 'PAID',
+  FAILED = 'FAILED',
+  VOID = 'VOID',
+}
+
+export enum WhatsAppConversationStatus {
+  OPEN = 'OPEN',
+  DRAFT_ORDER_CREATED = 'DRAFT_ORDER_CREATED',
+  CLOSED = 'CLOSED',
+}
+
+export enum WhatsAppMessageDirection {
+  INBOUND = 'INBOUND',
+  OUTBOUND = 'OUTBOUND',
+}
