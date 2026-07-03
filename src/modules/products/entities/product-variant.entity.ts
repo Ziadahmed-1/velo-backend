@@ -13,6 +13,7 @@ import {
 import { Account } from '../../accounts/entities/account.entity';
 import { Product } from './product.entity';
 import { InventoryLedger } from '../../inventory/entities/inventory-ledger.entity';
+import { OrderItem } from '../../orders/entities/order-item.entity';
 
 @Entity('product_variants')
 @Unique(['accountId', 'sku'])
@@ -61,7 +62,17 @@ export class ProductVariant {
 
   @OneToMany(() => InventoryLedger, (entry) => entry.variant)
   ledgerEntries: InventoryLedger[];
+
+  @OneToMany(() => OrderItem, (item) => item.variant)
+  orderItems: OrderItem[];
 }
+
+// NOTE: the GIN index below uses `synchronize: false` because TypeORM's
+// migration generator doesn't reliably emit `USING GIN` for jsonb columns
+// across all versions. Add it explicitly in a migration instead:
+//
+//   CREATE INDEX idx_product_variants_attributes_gin
+//   ON product_variants USING GIN ("attributesJson");
 
 // NOTE: the GIN index above uses `synchronize: false` because TypeORM's
 // migration generator doesn't reliably emit `USING GIN` for jsonb columns
