@@ -22,6 +22,6 @@ import { SuggestedItem } from '../products/entities/suggested-item.entity';
   ],
   controllers: [PasteParseController],
   providers: [PasteParseService, ExtractionService, CatalogMatcherService],
-  exports: [ExtractionService, CatalogMatcherService],
+  exports: [ExtractionService, CatalogMatcherService, PasteParseService],
 })
 export class PasteParseModule {}
