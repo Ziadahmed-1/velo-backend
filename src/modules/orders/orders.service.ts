@@ -1,18 +1,27 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { Repository, DataSource } from 'typeorm';
 import { Order } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { Invoice } from './entities/invoice.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { ConfirmOrderDto } from './dto/confirm-order.dto';
 import { InventoryLedger } from '../inventory/entities/inventory-ledger.entity';
 import { LedgerReason, OrderSourceChannel } from '../../common/enums';
+import { RFM_QUEUE } from '../../queues/queue.constants';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectRepository(Order) private orderRepo: Repository<Order>,
     private dataSource: DataSource,
+    @InjectQueue(RFM_QUEUE) private rfmQueue: Queue,
   ) {}
 
   async create(accountId: string, dto: CreateOrderDto) {
@@ -86,5 +95,19 @@ export class OrdersService {
     });
     if (!o) throw new NotFoundException('Order not found');
     return o;
+  }
+
+  async confirmOrder(accountId: string, id: string, dto?: ConfirmOrderDto) {
+    const order = await this.findOne(accountId, id);
+    if (!order.isDraft)
+      throw new BadRequestException('Order already confirmed');
+
+    order.isDraft = false;
+    if (dto?.courierProvider) order.courierProvider = dto.courierProvider;
+    await this.orderRepo.save(order);
+
+    await this.rfmQueue.add('rfm', { orderId: order.id, accountId });
+
+    return this.findOne(accountId, id);
   }
 }

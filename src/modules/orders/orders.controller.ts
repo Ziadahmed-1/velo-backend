@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { ConfirmOrderDto } from './dto/confirm-order.dto';
 import { CurrentAccount } from '../../common/decorators/current-account.decorator';
 import type { RequestUser } from '../../common/interfaces/request-user.interface';
 
@@ -21,5 +22,13 @@ export class OrdersController {
     @Param('id') id: string,
   ) {
     return this.ordersService.findOne(user.accountId, id);
+  }
+  @Patch(':id/confirm')
+  confirm(
+    @CurrentAccount() user: RequestUser,
+    @Param('id') id: string,
+    @Body() dto?: ConfirmOrderDto,
+  ) {
+    return this.ordersService.confirmOrder(user.accountId, id, dto);
   }
 }
