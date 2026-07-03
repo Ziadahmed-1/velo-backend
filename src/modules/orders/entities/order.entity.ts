@@ -15,6 +15,8 @@ import { Customer } from '../../customers/entities/customer.entity';
 import { OrderItem } from './order-item.entity';
 import { Invoice } from './invoice.entity';
 import { InventoryLedger } from '../../inventory/entities/inventory-ledger.entity';
+import { WhatsAppConversation } from '../../whatsapp/entities/whatsapp-conversation.entity';
+import { CourierRemittanceLine } from '../../courier/entities/courier-remittance-line.entity';
 
 @Entity('orders')
 @Index(['accountId', 'status', 'createdAt'])
@@ -62,6 +64,9 @@ export class Order {
   @Column({ nullable: true })
   courierProvider: string | null;
 
+  @Column({ nullable: true })
+  waConversationId: string | null;
+
   @Column({ type: 'enum', enum: OrderSourceChannel, default: OrderSourceChannel.MANUAL })
   sourceChannel: OrderSourceChannel;
 
@@ -76,4 +81,11 @@ export class Order {
 
   @OneToMany(() => InventoryLedger, (entry) => entry.order)
   inventoryLedgerEntries: InventoryLedger[];
+
+  @ManyToOne(() => WhatsAppConversation, (conversation) => conversation.orders, { nullable: true })
+  @JoinColumn({ name: 'waConversationId' })
+  waConversation: WhatsAppConversation;
+
+  @OneToMany(() => CourierRemittanceLine, (line) => line.order)
+  remittanceLines: CourierRemittanceLine[];
 }

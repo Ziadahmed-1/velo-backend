@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { Account } from '../../accounts/entities/account.entity';
 import { Order } from '../../orders/entities/order.entity';
+import { WhatsAppConversation } from '../../whatsapp/entities/whatsapp-conversation.entity';
 
 @Entity('customers')
 @Unique(['accountId', 'phone'])
@@ -64,4 +65,7 @@ export class Customer {
 
   @OneToMany(() => Order, (order) => order.customer)
   orders: Order[];
+
+  @OneToMany(() => WhatsAppConversation, (conversation) => conversation.customer)
+  conversations: WhatsAppConversation[];
 }
