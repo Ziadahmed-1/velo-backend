@@ -84,6 +84,12 @@ export class Order {
   })
   sourceChannel: OrderSourceChannel;
 
+  @Column({ default: true })
+  isDraft: boolean;
+
+  @Column('jsonb', { nullable: true })
+  conversationContext: object | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

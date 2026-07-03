@@ -81,3 +81,9 @@ export enum WhatsAppMessageDirection {
   INBOUND = 'INBOUND',
   OUTBOUND = 'OUTBOUND',
 }
+
+export enum MatchStatus {
+  HIGH_CONFIDENCE = 'HIGH_CONFIDENCE',
+  AMBIGUOUS = 'AMBIGUOUS',
+  NO_MATCH = 'NO_MATCH',
+}

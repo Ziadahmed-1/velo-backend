@@ -4,6 +4,7 @@ import { Product } from './entities/product.entity';
 import { ProductVariant } from './entities/product-variant.entity';
 import { Attribute } from './entities/attribute.entity';
 import { AttributeValue } from './entities/attribute-value.entity';
+import { SuggestedItem } from './entities/suggested-item.entity';
 import { ProductsService } from './products.service';
 import { ProductsController } from './products.controller';
 
@@ -14,6 +15,7 @@ import { ProductsController } from './products.controller';
       ProductVariant,
       Attribute,
       AttributeValue,
+      SuggestedItem,
     ]),
   ],
   controllers: [ProductsController],
