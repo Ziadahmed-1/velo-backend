@@ -12,7 +12,9 @@ export class InventoryService {
     @InjectRepository(ProductVariant) private variantRepo: Repository<ProductVariant>,
   ) {}
 
-  async getStock(variantId: string) {
+  async getStock(accountId: string, variantId: string) {
+    const variant = await this.variantRepo.findOne({ where: { id: variantId, accountId } });
+    if (!variant) throw new NotFoundException('Variant not found');
     const { sum } = await this.ledgerRepo
       .createQueryBuilder('ledger')
       .select('SUM(ledger.quantity)', 'sum')

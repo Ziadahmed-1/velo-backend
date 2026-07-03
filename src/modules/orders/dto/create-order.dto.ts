@@ -4,15 +4,15 @@ import { Type } from 'class-transformer';
 class OrderItemDto {
   @IsString() variantId: string;
   @IsNumber() quantity: number;
-  @IsNumber() price: number;
+  @IsString() price: string;
 }
 
 export class CreateOrderDto {
   @IsString() customerId: string;
-  @IsNumber() subTotal: number;
-  @IsNumber() shippingFee: number;
-  @IsNumber() vatAmount: number;
-  @IsNumber() totalAmount: number;
+  @IsString() subTotal: string;
+  @IsString() shippingFee: string;
+  @IsString() vatAmount: string;
+  @IsString() totalAmount: string;
   @IsOptional() @IsString() courierProvider?: string;
   @IsArray() @ValidateNested({ each: true }) @Type(() => OrderItemDto) items: OrderItemDto[];
 }

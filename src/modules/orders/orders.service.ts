@@ -29,7 +29,7 @@ export class OrdersService {
       const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
       await qr.manager.save(qr.manager.create(Invoice, { orderId: order.id, invoiceNumber: `INV-${dateStr}-${order.id.substring(0,4).toUpperCase()}` }));
       await qr.commitTransaction();
-      return this.orderRepo.findOne({ where: { id: order.id }, relations: { orderItems: true, invoice: true } });
+      return this.orderRepo.findOne({ where: { id: order.id }, relations: { orderItems: true, customer: true, invoice: true } });
     } catch (err) { await qr.rollbackTransaction(); throw err; }
     finally { await qr.release(); }
   }

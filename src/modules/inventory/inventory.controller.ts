@@ -8,8 +8,8 @@ export class InventoryController {
   constructor(private inventoryService: InventoryService) {}
 
   @Get('variants/:variantId/stock')
-  getStock(@Param('variantId') variantId: string) {
-    return this.inventoryService.getStock(variantId);
+  getStock(@CurrentAccount() user: any, @Param('variantId') variantId: string) {
+    return this.inventoryService.getStock(user.accountId, variantId);
   }
 
   @Post('adjust')
