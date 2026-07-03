@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 import { Account } from '../../accounts/entities/account.entity';
 import { Product } from './product.entity';
+import { InventoryLedger } from '../../inventory/entities/inventory-ledger.entity';
 
 @Entity('product_variants')
 @Unique(['accountId', 'sku'])
@@ -58,7 +59,8 @@ export class ProductVariant {
   @UpdateDateColumn()
   updatedAt: Date;
 
-
+  @OneToMany(() => InventoryLedger, (entry) => entry.variant)
+  ledgerEntries: InventoryLedger[];
 }
 
 // NOTE: the GIN index above uses `synchronize: false` because TypeORM's
