@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { AdjustStockDto } from './dto/adjust-stock.dto';
 import { CurrentAccount } from '../../common/decorators/current-account.decorator';
-import { RequestUser } from '../../common/interfaces/request-user.interface';
+import type { RequestUser } from '../../common/interfaces/request-user.interface';
 
 @Controller('inventory')
 export class InventoryController {

@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { CurrentAccount } from '../../common/decorators/current-account.decorator';
-import { RequestUser } from '../../common/interfaces/request-user.interface';
+import type { RequestUser } from '../../common/interfaces/request-user.interface';
 
 @Controller('orders')
 export class OrdersController {
