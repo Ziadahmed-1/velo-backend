@@ -1,6 +1,7 @@
 ﻿### Task 3: Accounts Module — Entities + Auth
 
 **Files:**
+
 - Create: `src/modules/accounts/entities/account.entity.ts`
 - Create: `src/modules/accounts/entities/user.entity.ts`
 - Create: `src/modules/accounts/dto/register.dto.ts`
@@ -19,6 +20,7 @@
 - [ ] **Step 3: Create DTOs**
 
 `src/modules/accounts/dto/register.dto.ts`:
+
 ```typescript
 import { IsEmail, IsString, MinLength } from 'class-validator';
 export class RegisterDto {
@@ -29,6 +31,7 @@ export class RegisterDto {
 ```
 
 `src/modules/accounts/dto/login.dto.ts`:
+
 ```typescript
 import { IsEmail, IsString } from 'class-validator';
 export class LoginDto {
@@ -38,6 +41,7 @@ export class LoginDto {
 ```
 
 `src/modules/accounts/dto/invite-user.dto.ts`:
+
 ```typescript
 import { IsEmail, IsEnum } from 'class-validator';
 import { UserRole } from '../../../common/enums';
@@ -50,6 +54,7 @@ export class InviteUserDto {
 - [ ] **Step 4: Create JWT strategy**
 
 `src/modules/accounts/jwt.strategy.ts`:
+
 ```typescript
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
@@ -75,8 +80,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: { sub: string; accountId: string; role: string }) {
     const user = await this.userRepo.findOne({ where: { id: payload.sub } });
     if (!user) throw new UnauthorizedException();
-    const account = await this.accountRepo.findOne({ where: { id: payload.accountId } });
-    return { id: user.id, accountId: user.accountId, role: user.role, accountStatus: account?.status };
+    const account = await this.accountRepo.findOne({
+      where: { id: payload.accountId },
+    });
+    return {
+      id: user.id,
+      accountId: user.accountId,
+      role: user.role,
+      accountStatus: account?.status,
+    };
   }
 }
 ```
@@ -84,8 +96,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 - [ ] **Step 5: Create AuthService**
 
 `src/modules/accounts/auth.service.ts`:
+
 ```typescript
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -105,12 +122,19 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
-    const existing = await this.userRepo.findOne({ where: { email: dto.email } });
+    const existing = await this.userRepo.findOne({
+      where: { email: dto.email },
+    });
     if (existing) throw new ConflictException('Email already in use');
     const account = this.accountRepo.create({ businessName: dto.businessName });
     await this.accountRepo.save(account);
     const passwordHash = await bcrypt.hash(dto.password, 12);
-    const user = this.userRepo.create({ accountId: account.id, email: dto.email, passwordHash, role: UserRole.OWNER });
+    const user = this.userRepo.create({
+      accountId: account.id,
+      email: dto.email,
+      passwordHash,
+      role: UserRole.OWNER,
+    });
     await this.userRepo.save(user);
     return this.generateToken(user, account);
   }
@@ -120,13 +144,19 @@ export class AuthService {
     if (!user) throw new UnauthorizedException('Invalid credentials');
     const valid = await bcrypt.compare(dto.password, user.passwordHash);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
-    const account = await this.accountRepo.findOne({ where: { id: user.accountId } });
+    const account = await this.accountRepo.findOne({
+      where: { id: user.accountId },
+    });
     return this.generateToken(user, account);
   }
 
   private generateToken(user: User, account: Account) {
     return {
-      accessToken: this.jwtService.sign({ sub: user.id, accountId: user.accountId, role: user.role }),
+      accessToken: this.jwtService.sign({
+        sub: user.id,
+        accountId: user.accountId,
+        role: user.role,
+      }),
       accountId: user.accountId,
       accountStatus: account.status,
     };
@@ -137,6 +167,7 @@ export class AuthService {
 - [ ] **Step 6: Create AuthController**
 
 `src/modules/accounts/auth.controller.ts`:
+
 ```typescript
 import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -146,14 +177,19 @@ import { LoginDto } from './dto/login.dto';
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
-  @Post('register') register(@Body() dto: RegisterDto) { return this.authService.register(dto); }
-  @Post('login') login(@Body() dto: LoginDto) { return this.authService.login(dto); }
+  @Post('register') register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto);
+  }
+  @Post('login') login(@Body() dto: LoginDto) {
+    return this.authService.login(dto);
+  }
 }
 ```
 
 - [ ] **Step 7: Create AccountsService + Controller**
 
 `src/modules/accounts/accounts.service.ts`:
+
 ```typescript
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -165,13 +201,19 @@ import { InviteUserDto } from './dto/invite-user.dto';
 export class AccountsService {
   constructor(@InjectRepository(User) private userRepo: Repository<User>) {}
   async inviteUser(accountId: string, dto: InviteUserDto) {
-    const user = this.userRepo.create({ accountId, email: dto.email, passwordHash: 'CHANGE_ME', role: dto.role });
+    const user = this.userRepo.create({
+      accountId,
+      email: dto.email,
+      passwordHash: 'CHANGE_ME',
+      role: dto.role,
+    });
     return this.userRepo.save(user);
   }
 }
 ```
 
 `src/modules/accounts/accounts.controller.ts`:
+
 ```typescript
 import { Controller, Post, Body } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
@@ -194,6 +236,7 @@ export class AccountsController {
 - [ ] **Step 8: Create AccountsModule**
 
 `src/modules/accounts/accounts.module.ts`:
+
 ```typescript
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -228,6 +271,7 @@ export class AccountsModule {}
 - [ ] **Step 9: Write auth tests**
 
 `tests/unit/auth.service.spec.ts`:
+
 ```typescript
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -244,7 +288,13 @@ describe('AuthService', () => {
   let userRepo: any;
 
   const mockAccount = { id: 'acc-1', businessName: 'Test', status: 'TRIALING' };
-  const mockUser = { id: 'usr-1', accountId: 'acc-1', email: 'test@example.com', passwordHash: 'hashed', role: 'OWNER' };
+  const mockUser = {
+    id: 'usr-1',
+    accountId: 'acc-1',
+    email: 'test@example.com',
+    passwordHash: 'hashed',
+    role: 'OWNER',
+  };
 
   beforeEach(async () => {
     accountRepo = {
@@ -262,7 +312,10 @@ describe('AuthService', () => {
         AuthService,
         { provide: getRepositoryToken(Account), useValue: accountRepo },
         { provide: getRepositoryToken(User), useValue: userRepo },
-        { provide: JwtService, useValue: { sign: jest.fn().mockReturnValue('token-123') } },
+        {
+          provide: JwtService,
+          useValue: { sign: jest.fn().mockReturnValue('token-123') },
+        },
       ],
     }).compile();
     service = module.get<AuthService>(AuthService);
@@ -270,26 +323,41 @@ describe('AuthService', () => {
 
   it('should register a new account with owner user', async () => {
     userRepo.findOne.mockResolvedValue(null);
-    const result = await service.register({ businessName: 'Test', email: 'test@example.com', password: 'password123' });
+    const result = await service.register({
+      businessName: 'Test',
+      email: 'test@example.com',
+      password: 'password123',
+    });
     expect(result.accessToken).toBe('token-123');
   });
 
   it('should throw ConflictException on duplicate email', async () => {
     userRepo.findOne.mockResolvedValue(mockUser);
-    await expect(service.register({ businessName: 'Test', email: 'test@example.com', password: 'password123' })).rejects.toThrow(ConflictException);
+    await expect(
+      service.register({
+        businessName: 'Test',
+        email: 'test@example.com',
+        password: 'password123',
+      }),
+    ).rejects.toThrow(ConflictException);
   });
 
   it('should login with valid credentials', async () => {
     userRepo.findOne.mockResolvedValue(mockUser);
     jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
-    const result = await service.login({ email: 'test@example.com', password: 'password123' });
+    const result = await service.login({
+      email: 'test@example.com',
+      password: 'password123',
+    });
     expect(result.accessToken).toBe('token-123');
   });
 
   it('should throw UnauthorizedException on wrong password', async () => {
     userRepo.findOne.mockResolvedValue(mockUser);
     jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
-    await expect(service.login({ email: 'test@example.com', password: 'wrong' })).rejects.toThrow(UnauthorizedException);
+    await expect(
+      service.login({ email: 'test@example.com', password: 'wrong' }),
+    ).rejects.toThrow(UnauthorizedException);
   });
 });
 ```
@@ -311,5 +379,3 @@ git commit -m "feat: add auth module with JWT authentication and guards"
 ```
 
 ---
-
-

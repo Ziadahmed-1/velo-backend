@@ -8,12 +8,16 @@ import { ProductVariant } from '../products/entities/product-variant.entity';
 @Injectable()
 export class InventoryService {
   constructor(
-    @InjectRepository(InventoryLedger) private ledgerRepo: Repository<InventoryLedger>,
-    @InjectRepository(ProductVariant) private variantRepo: Repository<ProductVariant>,
+    @InjectRepository(InventoryLedger)
+    private ledgerRepo: Repository<InventoryLedger>,
+    @InjectRepository(ProductVariant)
+    private variantRepo: Repository<ProductVariant>,
   ) {}
 
   async getStock(accountId: string, variantId: string) {
-    const variant = await this.variantRepo.findOne({ where: { id: variantId, accountId } });
+    const variant = await this.variantRepo.findOne({
+      where: { id: variantId, accountId },
+    });
     if (!variant) throw new NotFoundException('Variant not found');
     const { sum } = await this.ledgerRepo
       .createQueryBuilder('ledger')
@@ -24,8 +28,17 @@ export class InventoryService {
   }
 
   async adjust(accountId: string, dto: AdjustStockDto) {
-    const variant = await this.variantRepo.findOne({ where: { id: dto.variantId, accountId } });
+    const variant = await this.variantRepo.findOne({
+      where: { id: dto.variantId, accountId },
+    });
     if (!variant) throw new NotFoundException('Variant not found');
-    return this.ledgerRepo.save(this.ledgerRepo.create({ variantId: dto.variantId, quantity: dto.quantity, reason: dto.reason, auditNote: dto.auditNote }));
+    return this.ledgerRepo.save(
+      this.ledgerRepo.create({
+        variantId: dto.variantId,
+        quantity: dto.quantity,
+        reason: dto.reason,
+        auditNote: dto.auditNote,
+      }),
+    );
   }
 }

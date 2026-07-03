@@ -23,7 +23,9 @@ export class Attribute {
   @Column()
   productId: string;
 
-  @ManyToOne(() => Product, (product) => product.attributes, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Product, (product) => product.attributes, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'productId' })
   product: Product;
 

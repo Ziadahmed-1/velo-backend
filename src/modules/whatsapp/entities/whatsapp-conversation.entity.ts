@@ -23,7 +23,9 @@ export class WhatsAppConversation {
   @Column()
   whatsAppAccountId: string;
 
-  @ManyToOne(() => WhatsAppAccount, (account) => account.conversations, { onDelete: 'CASCADE' })
+  @ManyToOne(() => WhatsAppAccount, (account) => account.conversations, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'whatsAppAccountId' })
   whatsAppAccount: WhatsAppAccount;
 
@@ -33,11 +35,17 @@ export class WhatsAppConversation {
   @Column({ nullable: true })
   customerId: string | null;
 
-  @ManyToOne(() => Customer, (customer) => customer.conversations, { nullable: true })
+  @ManyToOne(() => Customer, (customer) => customer.conversations, {
+    nullable: true,
+  })
   @JoinColumn({ name: 'customerId' })
   customer: Customer | null;
 
-  @Column({ type: 'enum', enum: WhatsAppConversationStatus, default: WhatsAppConversationStatus.OPEN })
+  @Column({
+    type: 'enum',
+    enum: WhatsAppConversationStatus,
+    default: WhatsAppConversationStatus.OPEN,
+  })
   status: WhatsAppConversationStatus;
 
   @Column({ type: 'timestamptz', default: () => 'now()' })

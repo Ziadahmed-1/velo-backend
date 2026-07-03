@@ -1,6 +1,7 @@
 ﻿### Task 1: Project Scaffold + Docker + Dependencies
 
 **Files:**
+
 - Create: `docker-compose.yml`
 - Create: `.env`
 - Create: `.env.example`
@@ -17,8 +18,9 @@ npx @nestjs/cli new velo-backend --package-manager npm --skip-git --skip-install
 - [ ] **Step 2: Create Docker compose**
 
 Create `docker-compose.yml`:
+
 ```yaml
-version: "3.9"
+version: '3.9'
 services:
   postgres:
     image: postgres:16-alpine
@@ -27,13 +29,13 @@ services:
       POSTGRES_USER: velo
       POSTGRES_PASSWORD: velo_dev
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - '6379:6379'
 volumes:
   pgdata:
 ```
@@ -41,6 +43,7 @@ volumes:
 - [ ] **Step 3: Create env files**
 
 `.env`:
+
 ```
 NODE_ENV=development
 PORT=3000
@@ -143,5 +146,3 @@ git commit -m "feat: scaffold NestJS project with Docker and dependencies"
 ```
 
 ---
-
-

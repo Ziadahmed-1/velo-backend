@@ -6,6 +6,13 @@ import { WhatsAppMessage } from './entities/whatsapp-message.entity';
 import { WhatsAppTemplate } from './entities/whatsapp-template.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([WhatsAppAccount, WhatsAppConversation, WhatsAppMessage, WhatsAppTemplate])],
+  imports: [
+    TypeOrmModule.forFeature([
+      WhatsAppAccount,
+      WhatsAppConversation,
+      WhatsAppMessage,
+      WhatsAppTemplate,
+    ]),
+  ],
 })
 export class WhatsAppModule {}

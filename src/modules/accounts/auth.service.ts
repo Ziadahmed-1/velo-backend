@@ -1,4 +1,8 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -18,12 +22,19 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
-    const existing = await this.userRepo.findOne({ where: { email: dto.email } });
+    const existing = await this.userRepo.findOne({
+      where: { email: dto.email },
+    });
     if (existing) throw new ConflictException('Email already in use');
     const account = this.accountRepo.create({ businessName: dto.businessName });
     await this.accountRepo.save(account);
     const passwordHash = await bcrypt.hash(dto.password, 12);
-    const user = this.userRepo.create({ accountId: account.id, email: dto.email, passwordHash, role: UserRole.OWNER });
+    const user = this.userRepo.create({
+      accountId: account.id,
+      email: dto.email,
+      passwordHash,
+      role: UserRole.OWNER,
+    });
     await this.userRepo.save(user);
     return this.generateToken(user, account);
   }
@@ -33,14 +44,20 @@ export class AuthService {
     if (!user) throw new UnauthorizedException('Invalid credentials');
     const valid = await bcrypt.compare(dto.password, user.passwordHash);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
-    const account = await this.accountRepo.findOne({ where: { id: user.accountId } });
+    const account = await this.accountRepo.findOne({
+      where: { id: user.accountId },
+    });
     if (!account) throw new UnauthorizedException('Account not found');
     return this.generateToken(user, account);
   }
 
   private generateToken(user: User, account: Account) {
     return {
-      accessToken: this.jwtService.sign({ sub: user.id, accountId: user.accountId, role: user.role }),
+      accessToken: this.jwtService.sign({
+        sub: user.id,
+        accountId: user.accountId,
+        role: user.role,
+      }),
       accountId: user.accountId,
       accountStatus: account.status,
     };

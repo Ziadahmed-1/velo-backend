@@ -30,16 +30,16 @@ Tests:       7 passed, 7 total
 
 ## Files Changed
 
-| File | Status |
-|------|--------|
-| `src/modules/inventory/entities/inventory-ledger.entity.ts` | Created |
-| `src/modules/inventory/dto/adjust-stock.dto.ts` | Created |
-| `src/modules/inventory/inventory.service.ts` | Created |
-| `src/modules/inventory/inventory.controller.ts` | Created |
-| `src/modules/inventory/inventory.module.ts` | Replaced stub |
-| `tests/unit/inventory.service.spec.ts` | Created |
-| `src/modules/products/entities/product-variant.entity.ts` | Modified — restored `ledgerEntries` relation |
-| `src/modules/orders/entities/order.entity.ts` | Modified — added `inventoryLedgerEntries` inverse relation |
+| File                                                        | Status                                                     |
+| ----------------------------------------------------------- | ---------------------------------------------------------- |
+| `src/modules/inventory/entities/inventory-ledger.entity.ts` | Created                                                    |
+| `src/modules/inventory/dto/adjust-stock.dto.ts`             | Created                                                    |
+| `src/modules/inventory/inventory.service.ts`                | Created                                                    |
+| `src/modules/inventory/inventory.controller.ts`             | Created                                                    |
+| `src/modules/inventory/inventory.module.ts`                 | Replaced stub                                              |
+| `tests/unit/inventory.service.spec.ts`                      | Created                                                    |
+| `src/modules/products/entities/product-variant.entity.ts`   | Modified — restored `ledgerEntries` relation               |
+| `src/modules/orders/entities/order.entity.ts`               | Modified — added `inventoryLedgerEntries` inverse relation |
 
 ## Self-Review Findings
 

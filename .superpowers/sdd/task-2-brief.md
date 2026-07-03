@@ -1,6 +1,7 @@
 ﻿### Task 2: Common Layer — Enums, Decorators, Guards
 
 **Files:**
+
 - Create: `src/common/enums.ts`
 - Create: `src/common/guards/auth.guard.ts`
 - Create: `src/common/guards/roles.guard.ts`
@@ -15,14 +16,20 @@ Copy `velo-full-reference/src/common/enums.ts` to `src/common/enums.ts`
 - [ ] **Step 2: Create AuthGuard**
 
 `src/common/guards/auth.guard.ts`:
+
 ```typescript
-import { Injectable, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthGuard as PassportGuard } from '@nestjs/passport';
 
 @Injectable()
 export class AuthGuard extends PassportGuard('jwt') {
   handleRequest(err: any, user: any) {
-    if (err || !user) throw new UnauthorizedException('Invalid or expired token');
+    if (err || !user)
+      throw new UnauthorizedException('Invalid or expired token');
     return user;
   }
 }
@@ -31,6 +38,7 @@ export class AuthGuard extends PassportGuard('jwt') {
 - [ ] **Step 3: Create RolesGuard**
 
 `src/common/guards/roles.guard.ts`:
+
 ```typescript
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -42,9 +50,10 @@ export const ROLES_KEY = 'roles';
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(ROLES_KEY, [
-      context.getHandler(), context.getClass(),
-    ]);
+    const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
+      ROLES_KEY,
+      [context.getHandler(), context.getClass()],
+    );
     if (!requiredRoles) return true;
     const { user } = context.switchToHttp().getRequest();
     return requiredRoles.includes(user.role);
@@ -55,8 +64,15 @@ export class RolesGuard implements CanActivate {
 - [ ] **Step 4: Create SubscriptionGuard**
 
 `src/common/guards/subscription.guard.ts`:
+
 ```typescript
-import { Injectable, CanActivate, ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { AccountStatus } from '../enums';
 
 @Injectable()
@@ -79,6 +95,7 @@ export class SubscriptionGuard implements CanActivate {
 - [ ] **Step 5: Create decorators**
 
 `src/common/decorators/current-account.decorator.ts`:
+
 ```typescript
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 export const CurrentAccount = createParamDecorator(
@@ -90,6 +107,7 @@ export const CurrentAccount = createParamDecorator(
 ```
 
 `src/common/decorators/roles.decorator.ts`:
+
 ```typescript
 import { SetMetadata } from '@nestjs/common';
 import { UserRole } from '../enums';
@@ -100,6 +118,7 @@ export const Roles = (...roles: UserRole[]) => SetMetadata(ROLES_KEY, roles);
 - [ ] **Step 6: Create CommonModule**
 
 `src/common/common.module.ts`:
+
 ```typescript
 import { Global, Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
@@ -125,5 +144,3 @@ npx nest build
 ```
 
 ---
-
-

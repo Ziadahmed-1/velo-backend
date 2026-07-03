@@ -9,7 +9,11 @@ import {
   OneToOne,
   Index,
 } from 'typeorm';
-import { OrderStatus, CodStatus, OrderSourceChannel } from '../../../common/enums';
+import {
+  OrderStatus,
+  CodStatus,
+  OrderSourceChannel,
+} from '../../../common/enums';
 import { Account } from '../../accounts/entities/account.entity';
 import { Customer } from '../../customers/entities/customer.entity';
 import { OrderItem } from './order-item.entity';
@@ -29,7 +33,9 @@ export class Order {
   @Column()
   accountId: string;
 
-  @ManyToOne(() => Account, (account) => account.orders, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Account, (account) => account.orders, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'accountId' })
   account: Account;
 
@@ -43,7 +49,11 @@ export class Order {
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })
   status: OrderStatus;
 
-  @Column({ type: 'enum', enum: CodStatus, default: CodStatus.PENDING_COLLECTION })
+  @Column({
+    type: 'enum',
+    enum: CodStatus,
+    default: CodStatus.PENDING_COLLECTION,
+  })
   codStatus: CodStatus;
 
   @Column('decimal', { precision: 12, scale: 2 })
@@ -67,7 +77,11 @@ export class Order {
   @Column({ nullable: true })
   waConversationId: string | null;
 
-  @Column({ type: 'enum', enum: OrderSourceChannel, default: OrderSourceChannel.MANUAL })
+  @Column({
+    type: 'enum',
+    enum: OrderSourceChannel,
+    default: OrderSourceChannel.MANUAL,
+  })
   sourceChannel: OrderSourceChannel;
 
   @CreateDateColumn()
@@ -82,7 +96,11 @@ export class Order {
   @OneToMany(() => InventoryLedger, (entry) => entry.order)
   inventoryLedgerEntries: InventoryLedger[];
 
-  @ManyToOne(() => WhatsAppConversation, (conversation) => conversation.orders, { nullable: true })
+  @ManyToOne(
+    () => WhatsAppConversation,
+    (conversation) => conversation.orders,
+    { nullable: true },
+  )
   @JoinColumn({ name: 'waConversationId' })
   waConversation: WhatsAppConversation;
 

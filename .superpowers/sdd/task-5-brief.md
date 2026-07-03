@@ -1,6 +1,7 @@
 ﻿### Task 5: Inventory Module — Append-Only Ledger
 
 **Files:**
+
 - Create: `src/modules/inventory/entities/inventory-ledger.entity.ts`
 - Create: `src/modules/inventory/dto/adjust-stock.dto.ts`
 - Create: `src/modules/inventory/inventory.service.ts`
@@ -13,6 +14,7 @@
 - [ ] **Step 2: Create DTO**
 
 `src/modules/inventory/dto/adjust-stock.dto.ts`:
+
 ```typescript
 import { IsInt, IsEnum, IsOptional, IsString } from 'class-validator';
 import { LedgerReason } from '../../../common/enums';
@@ -27,6 +29,7 @@ export class AdjustStockDto {
 - [ ] **Step 3: Create InventoryService**
 
 `src/modules/inventory/inventory.service.ts`:
+
 ```typescript
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -38,8 +41,10 @@ import { ProductVariant } from '../products/entities/product-variant.entity';
 @Injectable()
 export class InventoryService {
   constructor(
-    @InjectRepository(InventoryLedger) private ledgerRepo: Repository<InventoryLedger>,
-    @InjectRepository(ProductVariant) private variantRepo: Repository<ProductVariant>,
+    @InjectRepository(InventoryLedger)
+    private ledgerRepo: Repository<InventoryLedger>,
+    @InjectRepository(ProductVariant)
+    private variantRepo: Repository<ProductVariant>,
   ) {}
 
   async getStock(variantId: string) {
@@ -52,9 +57,18 @@ export class InventoryService {
   }
 
   async adjust(accountId: string, dto: AdjustStockDto) {
-    const variant = await this.variantRepo.findOne({ where: { id: dto.variantId, accountId } });
+    const variant = await this.variantRepo.findOne({
+      where: { id: dto.variantId, accountId },
+    });
     if (!variant) throw new NotFoundException('Variant not found');
-    return this.ledgerRepo.save(this.ledgerRepo.create({ variantId: dto.variantId, quantity: dto.quantity, reason: dto.reason, auditNote: dto.auditNote }));
+    return this.ledgerRepo.save(
+      this.ledgerRepo.create({
+        variantId: dto.variantId,
+        quantity: dto.quantity,
+        reason: dto.reason,
+        auditNote: dto.auditNote,
+      }),
+    );
   }
 }
 ```
@@ -62,6 +76,7 @@ export class InventoryService {
 - [ ] **Step 4: Create InventoryController**
 
 `src/modules/inventory/inventory.controller.ts`:
+
 ```typescript
 import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
@@ -71,14 +86,24 @@ import { CurrentAccount } from '../../common/decorators/current-account.decorato
 @Controller('inventory')
 export class InventoryController {
   constructor(private inventoryService: InventoryService) {}
-  @Get('variants/:variantId/stock') getStock(@Param('variantId') variantId: string) { return this.inventoryService.getStock(variantId); }
-  @Post('adjust') adjust(@CurrentAccount() user: any, @Body() dto: AdjustStockDto) { return this.inventoryService.adjust(user.accountId, dto); }
+  @Get('variants/:variantId/stock') getStock(
+    @Param('variantId') variantId: string,
+  ) {
+    return this.inventoryService.getStock(variantId);
+  }
+  @Post('adjust') adjust(
+    @CurrentAccount() user: any,
+    @Body() dto: AdjustStockDto,
+  ) {
+    return this.inventoryService.adjust(user.accountId, dto);
+  }
 }
 ```
 
 - [ ] **Step 5: Create InventoryModule**
 
 `src/modules/inventory/inventory.module.ts`:
+
 ```typescript
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -98,6 +123,7 @@ export class InventoryModule {}
 - [ ] **Step 6: Write inventory tests**
 
 `tests/unit/inventory.service.spec.ts`:
+
 ```typescript
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -116,11 +142,14 @@ describe('InventoryService', () => {
       create: jest.fn().mockReturnValue({}),
       save: jest.fn().mockResolvedValue({ id: 'entry-1', quantity: 10 }),
       createQueryBuilder: jest.fn(() => ({
-        select: jest.fn().mockReturnThis(), where: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
         getRawOne: jest.fn().mockResolvedValue({ sum: '10' }),
       })),
     };
-    variantRepo = { findOne: jest.fn().mockResolvedValue({ id: 'var-1', accountId: 'acc-1' }) };
+    variantRepo = {
+      findOne: jest.fn().mockResolvedValue({ id: 'var-1', accountId: 'acc-1' }),
+    };
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         InventoryService,
@@ -137,14 +166,24 @@ describe('InventoryService', () => {
   });
 
   it('should add a ledger entry on stock adjust', async () => {
-    const result = await service.adjust('acc-1', { variantId: 'var-1', quantity: 10, reason: 'INITIAL_RESTOCK' as any });
+    const result = await service.adjust('acc-1', {
+      variantId: 'var-1',
+      quantity: 10,
+      reason: 'INITIAL_RESTOCK' as any,
+    });
     expect(ledgerRepo.create).toHaveBeenCalled();
     expect(ledgerRepo.save).toHaveBeenCalled();
   });
 
   it('should throw if variant not found for the account', async () => {
     variantRepo.findOne.mockResolvedValue(null);
-    await expect(service.adjust('other-acc', { variantId: 'var-1', quantity: 5, reason: 'MANUAL_ADJUSTMENT' as any })).rejects.toThrow(NotFoundException);
+    await expect(
+      service.adjust('other-acc', {
+        variantId: 'var-1',
+        quantity: 5,
+        reason: 'MANUAL_ADJUSTMENT' as any,
+      }),
+    ).rejects.toThrow(NotFoundException);
   });
 });
 ```
@@ -166,5 +205,3 @@ git commit -m "feat: add inventory ledger module with stock adjustment"
 ```
 
 ---
-
-

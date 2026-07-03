@@ -19,7 +19,9 @@ export class WhatsAppAccount {
   @Column({ unique: true })
   accountId: string;
 
-  @OneToOne(() => Account, (account) => account.whatsAppAccount, { onDelete: 'CASCADE' })
+  @OneToOne(() => Account, (account) => account.whatsAppAccount, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'accountId' })
   account: Account;
 
@@ -44,6 +46,9 @@ export class WhatsAppAccount {
   @OneToMany(() => WhatsAppTemplate, (template) => template.whatsAppAccount)
   templates: WhatsAppTemplate[];
 
-  @OneToMany(() => WhatsAppConversation, (conversation) => conversation.whatsAppAccount)
+  @OneToMany(
+    () => WhatsAppConversation,
+    (conversation) => conversation.whatsAppAccount,
+  )
   conversations: WhatsAppConversation[];
 }

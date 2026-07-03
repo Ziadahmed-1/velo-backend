@@ -19,9 +19,13 @@ export class WhatsAppMessage {
   @Column()
   conversationId: string;
 
-  @ManyToOne(() => WhatsAppConversation, (conversation) => conversation.messages, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(
+    () => WhatsAppConversation,
+    (conversation) => conversation.messages,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
   @JoinColumn({ name: 'conversationId' })
   conversation: WhatsAppConversation;
 

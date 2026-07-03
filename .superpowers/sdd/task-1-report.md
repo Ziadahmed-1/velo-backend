@@ -24,32 +24,32 @@
 
 ## Files changed
 
-| File | Action |
-|------|--------|
-| `docker-compose.yml` | Create |
-| `.env` | Create (gitignored) |
-| `.env.example` | Create |
-| `.gitignore` | Create |
-| `package.json` | Create (via NestJS CLI + npm install) |
-| `package-lock.json` | Create |
-| `nest-cli.json` | Create (via NestJS CLI) |
-| `tsconfig.json` | Create (via NestJS CLI) |
-| `tsconfig.build.json` | Create (via NestJS CLI) |
-| `eslint.config.mjs` | Create (via NestJS CLI) |
-| `.prettierrc` | Create (via NestJS CLI) |
-| `README.md` | Create (via NestJS CLI) |
-| `src/app.module.ts` | Create |
-| `src/main.ts` | Create |
-| `src/modules/accounts/accounts.module.ts` | Create |
-| `src/modules/products/products.module.ts` | Create |
-| `src/modules/inventory/inventory.module.ts` | Create |
-| `src/modules/customers/customers.module.ts` | Create |
-| `src/modules/orders/orders.module.ts` | Create |
-| `src/modules/courier/courier.module.ts` | Create |
-| `src/modules/billing/billing.module.ts` | Create |
-| `src/modules/whatsapp/whatsapp.module.ts` | Create |
-| `test/app.e2e-spec.ts` | Create (via NestJS CLI) |
-| `test/jest-e2e.json` | Create (via NestJS CLI) |
+| File                                        | Action                                |
+| ------------------------------------------- | ------------------------------------- |
+| `docker-compose.yml`                        | Create                                |
+| `.env`                                      | Create (gitignored)                   |
+| `.env.example`                              | Create                                |
+| `.gitignore`                                | Create                                |
+| `package.json`                              | Create (via NestJS CLI + npm install) |
+| `package-lock.json`                         | Create                                |
+| `nest-cli.json`                             | Create (via NestJS CLI)               |
+| `tsconfig.json`                             | Create (via NestJS CLI)               |
+| `tsconfig.build.json`                       | Create (via NestJS CLI)               |
+| `eslint.config.mjs`                         | Create (via NestJS CLI)               |
+| `.prettierrc`                               | Create (via NestJS CLI)               |
+| `README.md`                                 | Create (via NestJS CLI)               |
+| `src/app.module.ts`                         | Create                                |
+| `src/main.ts`                               | Create                                |
+| `src/modules/accounts/accounts.module.ts`   | Create                                |
+| `src/modules/products/products.module.ts`   | Create                                |
+| `src/modules/inventory/inventory.module.ts` | Create                                |
+| `src/modules/customers/customers.module.ts` | Create                                |
+| `src/modules/orders/orders.module.ts`       | Create                                |
+| `src/modules/courier/courier.module.ts`     | Create                                |
+| `src/modules/billing/billing.module.ts`     | Create                                |
+| `src/modules/whatsapp/whatsapp.module.ts`   | Create                                |
+| `test/app.e2e-spec.ts`                      | Create (via NestJS CLI)               |
+| `test/jest-e2e.json`                        | Create (via NestJS CLI)               |
 
 ## Self-review findings
 

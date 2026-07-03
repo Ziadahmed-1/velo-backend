@@ -32,7 +32,11 @@ export class SubscriptionInvoice {
   @Column('decimal', { precision: 12, scale: 2 })
   totalAmountEgp: string;
 
-  @Column({ type: 'enum', enum: SubscriptionInvoiceStatus, default: SubscriptionInvoiceStatus.DRAFT })
+  @Column({
+    type: 'enum',
+    enum: SubscriptionInvoiceStatus,
+    default: SubscriptionInvoiceStatus.DRAFT,
+  })
   status: SubscriptionInvoiceStatus;
 
   @Column({ nullable: true })

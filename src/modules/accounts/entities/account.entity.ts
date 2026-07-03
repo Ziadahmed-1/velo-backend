@@ -27,7 +27,11 @@ export class Account {
   @Column()
   businessName: string;
 
-  @Column({ type: 'enum', enum: AccountStatus, default: AccountStatus.TRIALING })
+  @Column({
+    type: 'enum',
+    enum: AccountStatus,
+    default: AccountStatus.TRIALING,
+  })
   status: AccountStatus;
 
   @CreateDateColumn()

@@ -16,16 +16,16 @@
 
 ## Files changed
 
-| File | Action |
-|------|--------|
-| `src/app.module.ts` | modified — added CommonModule import |
-| `src/common/enums.ts` | created |
-| `src/common/guards/auth.guard.ts` | created |
-| `src/common/guards/roles.guard.ts` | created |
-| `src/common/guards/subscription.guard.ts` | created |
-| `src/common/decorators/current-account.decorator.ts` | created |
-| `src/common/decorators/roles.decorator.ts` | created |
-| `src/common/common.module.ts` | created |
+| File                                                 | Action                               |
+| ---------------------------------------------------- | ------------------------------------ |
+| `src/app.module.ts`                                  | modified — added CommonModule import |
+| `src/common/enums.ts`                                | created                              |
+| `src/common/guards/auth.guard.ts`                    | created                              |
+| `src/common/guards/roles.guard.ts`                   | created                              |
+| `src/common/guards/subscription.guard.ts`            | created                              |
+| `src/common/decorators/current-account.decorator.ts` | created                              |
+| `src/common/decorators/roles.decorator.ts`           | created                              |
+| `src/common/common.module.ts`                        | created                              |
 
 ## Self-review findings
 

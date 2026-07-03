@@ -22,7 +22,9 @@ export class Product {
   @Column()
   accountId: string;
 
-  @ManyToOne(() => Account, (account) => account.products, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Account, (account) => account.products, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'accountId' })
   account: Account;
 

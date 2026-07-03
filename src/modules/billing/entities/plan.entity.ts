@@ -19,7 +19,11 @@ export class Plan {
   @Column('decimal', { precision: 12, scale: 2 })
   overagePricePerOrderEgp: string;
 
-  @Column({ type: 'enum', enum: BillingInterval, default: BillingInterval.MONTHLY })
+  @Column({
+    type: 'enum',
+    enum: BillingInterval,
+    default: BillingInterval.MONTHLY,
+  })
   billingInterval: BillingInterval;
 
   @Column('jsonb', { default: [] })

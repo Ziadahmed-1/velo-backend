@@ -21,7 +21,9 @@ export class InventoryLedger {
   @Column()
   variantId: string;
 
-  @ManyToOne(() => ProductVariant, (variant) => variant.ledgerEntries, { onDelete: 'CASCADE' })
+  @ManyToOne(() => ProductVariant, (variant) => variant.ledgerEntries, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'variantId' })
   variant: ProductVariant;
 
@@ -34,7 +36,9 @@ export class InventoryLedger {
   @Column({ nullable: true })
   orderId: string | null;
 
-  @ManyToOne(() => Order, (order) => order.inventoryLedgerEntries, { nullable: true })
+  @ManyToOne(() => Order, (order) => order.inventoryLedgerEntries, {
+    nullable: true,
+  })
   @JoinColumn({ name: 'orderId' })
   order: Order | null;
 

@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Order } from './order.entity';
 import { ProductVariant } from '../../products/entities/product-variant.entity';
 
@@ -17,7 +23,9 @@ export class OrderItem {
   @Column()
   variantId: string;
 
-  @ManyToOne(() => ProductVariant, (variant) => variant.orderItems, { nullable: true })
+  @ManyToOne(() => ProductVariant, (variant) => variant.orderItems, {
+    nullable: true,
+  })
   @JoinColumn({ name: 'variantId' })
   variant: ProductVariant;
 

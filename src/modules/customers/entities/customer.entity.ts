@@ -23,7 +23,9 @@ export class Customer {
   @Column()
   accountId: string;
 
-  @ManyToOne(() => Account, (account) => account.customers, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Account, (account) => account.customers, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'accountId' })
   account: Account;
 
@@ -66,6 +68,9 @@ export class Customer {
   @OneToMany(() => Order, (order) => order.customer)
   orders: Order[];
 
-  @OneToMany(() => WhatsAppConversation, (conversation) => conversation.customer)
+  @OneToMany(
+    () => WhatsAppConversation,
+    (conversation) => conversation.customer,
+  )
   conversations: WhatsAppConversation[];
 }

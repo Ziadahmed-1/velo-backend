@@ -16,17 +16,17 @@ npx nest build — SUCCESS (0 errors)
 
 ## Files Changed
 
-| File | Status |
-|------|--------|
-| `src/modules/products/entities/product.entity.ts` | Modified (stub → full entity) |
+| File                                                      | Status                                                   |
+| --------------------------------------------------------- | -------------------------------------------------------- |
+| `src/modules/products/entities/product.entity.ts`         | Modified (stub → full entity)                            |
 | `src/modules/products/entities/product-variant.entity.ts` | Modified (stub → full entity, pruned future module refs) |
-| `src/modules/products/entities/attribute.entity.ts` | Created |
-| `src/modules/products/entities/attribute-value.entity.ts` | Created |
-| `src/modules/products/dto/create-product.dto.ts` | Created |
-| `src/modules/products/dto/create-variant.dto.ts` | Created |
-| `src/modules/products/products.service.ts` | Created |
-| `src/modules/products/products.controller.ts` | Created |
-| `src/modules/products/products.module.ts` | Modified (stub → full module) |
+| `src/modules/products/entities/attribute.entity.ts`       | Created                                                  |
+| `src/modules/products/entities/attribute-value.entity.ts` | Created                                                  |
+| `src/modules/products/dto/create-product.dto.ts`          | Created                                                  |
+| `src/modules/products/dto/create-variant.dto.ts`          | Created                                                  |
+| `src/modules/products/products.service.ts`                | Created                                                  |
+| `src/modules/products/products.controller.ts`             | Created                                                  |
+| `src/modules/products/products.module.ts`                 | Modified (stub → full module)                            |
 
 **9 files changed, 236 insertions(+), 12 deletions(-)**
 

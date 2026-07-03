@@ -15,11 +15,14 @@ describe('InventoryService', () => {
       create: jest.fn().mockReturnValue({}),
       save: jest.fn().mockResolvedValue({ id: 'entry-1', quantity: 10 }),
       createQueryBuilder: jest.fn(() => ({
-        select: jest.fn().mockReturnThis(), where: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
         getRawOne: jest.fn().mockResolvedValue({ sum: '10' }),
       })),
     };
-    variantRepo = { findOne: jest.fn().mockResolvedValue({ id: 'var-1', accountId: 'acc-1' }) };
+    variantRepo = {
+      findOne: jest.fn().mockResolvedValue({ id: 'var-1', accountId: 'acc-1' }),
+    };
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         InventoryService,
@@ -36,13 +39,23 @@ describe('InventoryService', () => {
   });
 
   it('should add a ledger entry on stock adjust', async () => {
-    const result = await service.adjust('acc-1', { variantId: 'var-1', quantity: 10, reason: 'INITIAL_RESTOCK' as any });
+    const result = await service.adjust('acc-1', {
+      variantId: 'var-1',
+      quantity: 10,
+      reason: 'INITIAL_RESTOCK' as any,
+    });
     expect(ledgerRepo.create).toHaveBeenCalled();
     expect(ledgerRepo.save).toHaveBeenCalled();
   });
 
   it('should throw if variant not found for the account', async () => {
     variantRepo.findOne.mockResolvedValue(null);
-    await expect(service.adjust('other-acc', { variantId: 'var-1', quantity: 5, reason: 'MANUAL_ADJUSTMENT' as any })).rejects.toThrow(NotFoundException);
+    await expect(
+      service.adjust('other-acc', {
+        variantId: 'var-1',
+        quantity: 5,
+        reason: 'MANUAL_ADJUSTMENT' as any,
+      }),
+    ).rejects.toThrow(NotFoundException);
   });
 });

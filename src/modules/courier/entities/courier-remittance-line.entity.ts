@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Unique } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  Unique,
+} from 'typeorm';
 import { CourierRemittance } from './courier-remittance.entity';
 import { Order } from '../../orders/entities/order.entity';
 
@@ -11,7 +18,9 @@ export class CourierRemittanceLine {
   @Column()
   remittanceId: string;
 
-  @ManyToOne(() => CourierRemittance, (remittance) => remittance.lines, { onDelete: 'CASCADE' })
+  @ManyToOne(() => CourierRemittance, (remittance) => remittance.lines, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'remittanceId' })
   remittance: CourierRemittance;
 

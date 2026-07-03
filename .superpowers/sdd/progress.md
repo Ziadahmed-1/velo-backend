@@ -7,3 +7,5 @@ Task 5: complete
 Task 5: complete (commits fc5b40d, review clean)
 Task 6: complete (commits efa546b, review clean)
 Task 7: complete (commits 3c9a03c, review clean)
+Task 8: complete (commit df20bab, tag phase-alpha-complete)
+Task 8: complete (commits df20bab, review pending)

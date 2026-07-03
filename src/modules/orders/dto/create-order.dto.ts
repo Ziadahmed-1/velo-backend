@@ -1,4 +1,10 @@
-import { IsString, IsArray, ValidateNested, IsNumber, IsOptional } from 'class-validator';
+import {
+  IsString,
+  IsArray,
+  ValidateNested,
+  IsNumber,
+  IsOptional,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 class OrderItemDto {
@@ -14,5 +20,8 @@ export class CreateOrderDto {
   @IsString() vatAmount: string;
   @IsString() totalAmount: string;
   @IsOptional() @IsString() courierProvider?: string;
-  @IsArray() @ValidateNested({ each: true }) @Type(() => OrderItemDto) items: OrderItemDto[];
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => OrderItemDto)
+  items: OrderItemDto[];
 }

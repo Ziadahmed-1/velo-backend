@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Unique } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  Unique,
+} from 'typeorm';
 import { WhatsAppAccount } from './whatsapp-account.entity';
 
 @Entity('whatsapp_templates')
@@ -10,7 +17,9 @@ export class WhatsAppTemplate {
   @Column()
   whatsAppAccountId: string;
 
-  @ManyToOne(() => WhatsAppAccount, (account) => account.templates, { onDelete: 'CASCADE' })
+  @ManyToOne(() => WhatsAppAccount, (account) => account.templates, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'whatsAppAccountId' })
   whatsAppAccount: WhatsAppAccount;
 

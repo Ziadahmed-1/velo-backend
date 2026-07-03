@@ -29,14 +29,18 @@ export class ProductVariant {
   @Column()
   accountId: string;
 
-  @ManyToOne(() => Account, (account) => account.productVariants, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Account, (account) => account.productVariants, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'accountId' })
   account: Account;
 
   @Column()
   productId: string;
 
-  @ManyToOne(() => Product, (product) => product.variants, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Product, (product) => product.variants, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'productId' })
   product: Product;
 

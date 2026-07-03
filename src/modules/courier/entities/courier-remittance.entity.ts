@@ -21,7 +21,9 @@ export class CourierRemittance {
   @Column()
   accountId: string;
 
-  @ManyToOne(() => Account, (account) => account.courierRemittances, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Account, (account) => account.courierRemittances, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'accountId' })
   account: Account;
 
@@ -34,7 +36,11 @@ export class CourierRemittance {
   @Column('decimal', { precision: 12, scale: 2, default: 0 })
   receivedAmount: string;
 
-  @Column({ type: 'enum', enum: RemittanceStatus, default: RemittanceStatus.PENDING })
+  @Column({
+    type: 'enum',
+    enum: RemittanceStatus,
+    default: RemittanceStatus.PENDING,
+  })
   status: RemittanceStatus;
 
   @Column({ type: 'timestamptz', nullable: true })

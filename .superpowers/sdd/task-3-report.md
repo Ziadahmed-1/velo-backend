@@ -33,28 +33,28 @@ Build succeeded with zero errors.
 
 ## Files Changed
 
-| File | Action |
-|------|--------|
-| `src/modules/accounts/entities/account.entity.ts` | Created |
-| `src/modules/accounts/entities/user.entity.ts` | Created |
-| `src/modules/accounts/dto/register.dto.ts` | Created |
-| `src/modules/accounts/dto/login.dto.ts` | Created |
-| `src/modules/accounts/dto/invite-user.dto.ts` | Created |
-| `src/modules/accounts/jwt.strategy.ts` | Created |
-| `src/modules/accounts/auth.service.ts` | Created |
-| `src/modules/accounts/auth.controller.ts` | Created |
-| `src/modules/accounts/accounts.service.ts` | Created |
-| `src/modules/accounts/accounts.controller.ts` | Created |
-| `src/modules/accounts/accounts.module.ts` | Rewritten (was empty shell) |
-| `src/modules/products/entities/product.entity.ts` | Created (stub) |
-| `src/modules/products/entities/product-variant.entity.ts` | Created (stub) |
-| `src/modules/customers/entities/customer.entity.ts` | Created (stub) |
-| `src/modules/orders/entities/order.entity.ts` | Created (stub) |
-| `src/modules/courier/entities/courier-remittance.entity.ts` | Created (stub) |
-| `src/modules/billing/entities/subscription.entity.ts` | Created (stub) |
-| `src/modules/whatsapp/entities/whatsapp-account.entity.ts` | Created (stub) |
-| `tests/unit/auth.service.spec.ts` | Created |
-| `package.json` | Modified (jest rootDir changed from "src" to "." for test file discovery) |
+| File                                                        | Action                                                                    |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `src/modules/accounts/entities/account.entity.ts`           | Created                                                                   |
+| `src/modules/accounts/entities/user.entity.ts`              | Created                                                                   |
+| `src/modules/accounts/dto/register.dto.ts`                  | Created                                                                   |
+| `src/modules/accounts/dto/login.dto.ts`                     | Created                                                                   |
+| `src/modules/accounts/dto/invite-user.dto.ts`               | Created                                                                   |
+| `src/modules/accounts/jwt.strategy.ts`                      | Created                                                                   |
+| `src/modules/accounts/auth.service.ts`                      | Created                                                                   |
+| `src/modules/accounts/auth.controller.ts`                   | Created                                                                   |
+| `src/modules/accounts/accounts.service.ts`                  | Created                                                                   |
+| `src/modules/accounts/accounts.controller.ts`               | Created                                                                   |
+| `src/modules/accounts/accounts.module.ts`                   | Rewritten (was empty shell)                                               |
+| `src/modules/products/entities/product.entity.ts`           | Created (stub)                                                            |
+| `src/modules/products/entities/product-variant.entity.ts`   | Created (stub)                                                            |
+| `src/modules/customers/entities/customer.entity.ts`         | Created (stub)                                                            |
+| `src/modules/orders/entities/order.entity.ts`               | Created (stub)                                                            |
+| `src/modules/courier/entities/courier-remittance.entity.ts` | Created (stub)                                                            |
+| `src/modules/billing/entities/subscription.entity.ts`       | Created (stub)                                                            |
+| `src/modules/whatsapp/entities/whatsapp-account.entity.ts`  | Created (stub)                                                            |
+| `tests/unit/auth.service.spec.ts`                           | Created                                                                   |
+| `package.json`                                              | Modified (jest rootDir changed from "src" to "." for test file discovery) |
 
 ## Self-Review Findings
 

@@ -1,6 +1,7 @@
 ﻿### Task 7: Courier, Billing, WhatsApp — Entity-Only Modules
 
 **Files:**
+
 - Create: src/modules/courier/ & billing/ & whatsapp/ entity files (10 entity files total)
 - Create: 3 module files (courier.module.ts, billing.module.ts, whatsapp.module.ts)
 
@@ -17,5 +18,3 @@ git commit -m "feat: add courier, billing, and whatsapp entity-only modules"
 ```
 
 ---
-
-

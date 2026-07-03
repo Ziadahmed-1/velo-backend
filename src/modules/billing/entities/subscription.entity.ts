@@ -22,7 +22,9 @@ export class Subscription {
   @Column({ unique: true })
   accountId: string;
 
-  @OneToOne(() => Account, (account) => account.subscription, { onDelete: 'CASCADE' })
+  @OneToOne(() => Account, (account) => account.subscription, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'accountId' })
   account: Account;
 
@@ -33,7 +35,11 @@ export class Subscription {
   @JoinColumn({ name: 'planId' })
   plan: Plan;
 
-  @Column({ type: 'enum', enum: SubscriptionStatus, default: SubscriptionStatus.TRIALING })
+  @Column({
+    type: 'enum',
+    enum: SubscriptionStatus,
+    default: SubscriptionStatus.TRIALING,
+  })
   status: SubscriptionStatus;
 
   @Column({ type: 'timestamptz' })
