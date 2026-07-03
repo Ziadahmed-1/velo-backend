@@ -10,6 +10,7 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { CourierModule } from './modules/courier/courier.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { WhatsAppModule } from './modules/whatsapp/whatsapp.module';
+import { PasteParseModule } from './modules/paste-parse/paste-parse.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { WhatsAppModule } from './modules/whatsapp/whatsapp.module';
     CourierModule,
     BillingModule,
     WhatsAppModule,
+    PasteParseModule,
   ],
 })
 export class AppModule {}
