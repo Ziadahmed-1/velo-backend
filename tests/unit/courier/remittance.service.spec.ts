@@ -77,7 +77,7 @@ describe('RemittanceService', () => {
     expect(result.id).toBe('rem-1');
     expect(remittanceRepo.findOne).toHaveBeenCalledWith({
       where: { id: 'rem-1', accountId: 'acc-1' },
-      relations: ['lines'],
+      relations: { lines: true },
     });
   });
 

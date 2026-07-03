@@ -145,7 +145,7 @@ export class WhatsAppService {
     if (!account) throw new NotFoundException('WhatsApp account not found');
     return this.conversationRepo.find({
       where: { whatsAppAccountId: account.id },
-      relations: ['messages'],
+      relations: { messages: true },
       order: { lastMessageAt: 'DESC' },
     });
   }

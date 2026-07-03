@@ -21,7 +21,7 @@ export class RemittanceService {
   async findOne(accountId: string, id: string) {
     const remittance = await this.remittanceRepo.findOne({
       where: { id, accountId },
-      relations: ['lines'],
+      relations: { lines: true },
     });
 
     if (!remittance) {
@@ -34,7 +34,7 @@ export class RemittanceService {
   async reconcile(accountId: string, id: string) {
     const remittance = await this.remittanceRepo.findOne({
       where: { id, accountId },
-      relations: ['lines'],
+      relations: { lines: true },
     });
 
     if (!remittance) {
@@ -42,7 +42,9 @@ export class RemittanceService {
     }
 
     const allSettled = remittance.lines.every((line) => {
-      return parseFloat(line.expectedAmount) === parseFloat(line.receivedAmount);
+      return (
+        parseFloat(line.expectedAmount) === parseFloat(line.receivedAmount)
+      );
     });
 
     if (allSettled) {

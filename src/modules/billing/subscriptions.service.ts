@@ -63,14 +63,14 @@ export class SubscriptionsService {
 
     return this.subRepo.findOne({
       where: { id: subscription.id },
-      relations: ['plan'],
+      relations: { plan: true },
     });
   }
 
   async getCurrent(accountId: string) {
     const sub = await this.subRepo.findOne({
       where: { accountId },
-      relations: ['plan'],
+      relations: { plan: true },
     });
     if (!sub) throw new NotFoundException('No active subscription found');
     return sub;
@@ -89,7 +89,7 @@ export class SubscriptionsService {
 
     return this.subRepo.findOne({
       where: { id: subscription.id },
-      relations: ['plan'],
+      relations: { plan: true },
     });
   }
 }

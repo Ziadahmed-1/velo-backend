@@ -30,7 +30,7 @@ export class CourierService {
   async createShipment(accountId: string, orderId: string) {
     const order = await this.orderRepo.findOne({
       where: { id: orderId, accountId },
-      relations: ['customer'],
+      relations: { customer: true },
     });
 
     if (!order) {

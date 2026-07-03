@@ -18,7 +18,7 @@ export class InvoicesService {
   async createInvoice(subscriptionId: string) {
     const subscription = await this.subRepo.findOne({
       where: { id: subscriptionId },
-      relations: ['plan'],
+      relations: { plan: true },
     });
     if (!subscription) throw new NotFoundException('Subscription not found');
 

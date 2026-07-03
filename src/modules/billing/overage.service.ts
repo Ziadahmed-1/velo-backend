@@ -16,7 +16,7 @@ export class OverageService {
   async calculate(subscriptionId: string) {
     const subscription = await this.subRepo.findOne({
       where: { id: subscriptionId },
-      relations: ['plan'],
+      relations: { plan: true },
     });
     if (!subscription) return { overageOrders: 0, overageAmountEgp: '0' };
 

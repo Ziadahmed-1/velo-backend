@@ -70,7 +70,7 @@ describe('SubscriptionsService', () => {
     await service.getCurrent('acc-1');
     expect(subRepo.findOne).toHaveBeenCalledWith({
       where: { accountId: 'acc-1' },
-      relations: ['plan'],
+      relations: { plan: true },
     });
   });
 

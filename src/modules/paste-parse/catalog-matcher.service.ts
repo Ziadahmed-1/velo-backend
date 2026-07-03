@@ -42,7 +42,7 @@ export class CatalogMatcherService {
   ): Promise<MatchResult[]> {
     const catalog = await this.variantRepo.find({
       where: { accountId },
-      select: ['id', 'name', 'price', 'attributesJson'],
+      select: { id: true, sku: true, price: true, attributesJson: true },
     });
 
     const systemPrompt = `You are matching extracted order items against a merchant's product catalog. For each extracted item, either find the exact match in the catalog, suggest 1-3 similar alternatives, or mark as no-match. Respond as JSON array only: [{ extractedName, matchStatus: 'HIGH_CONFIDENCE'|'AMBIGUOUS'|'NO_MATCH', matchedVariantId, matchConfidence (0-100), suggestedAlternatives: [{ variantId, name, price, reason }], quantity, price }]. No markdown, no code fences.`;
